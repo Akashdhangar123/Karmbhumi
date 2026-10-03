@@ -18,7 +18,15 @@ export const COLORS = {
 };
 
 export const FONT_FAMILY =
-  "'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif";
+  "'Noto Sans Devanagari', 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif";
+
+/**
+ * Layout width: Home page (max-w-7xl = 96rem = 1536px) ke barabar.
+ * Pehle 1100px tha, isliye baaki pages me dono side jagah khali dikh rahi thi.
+ * Chahiye to CONTENT_MAX_WIDTH ko "100%" kar do (bilkul full width).
+ */
+export const CONTENT_MAX_WIDTH = "1536px";
+export const SIDE_PADDING = "clamp(16px, 4vw, 32px)"; // mobile pe kam, desktop pe 32px
 
 export const shared: { [key: string]: CSSProperties } = {
   page: {
@@ -28,18 +36,25 @@ export const shared: { [key: string]: CSSProperties } = {
     margin: 0,
     padding: 0,
     lineHeight: 1.7,
+    textAlign: "left",
+    width: "100%",
   },
   section: {
-    padding: "48px 32px",
-    maxWidth: "1100px",
+    padding: `48px ${SIDE_PADDING}`,
+    width: "100%",
+    maxWidth: CONTENT_MAX_WIDTH,
     margin: "0 auto",
+    boxSizing: "border-box",
   },
   sectionAlt: {
-    padding: "48px 32px",
+    padding: `48px ${SIDE_PADDING}`,
     backgroundColor: COLORS.bgLight,
+    width: "100%",
+    boxSizing: "border-box",
   },
   sectionInner: {
-    maxWidth: "1100px",
+    width: "100%",
+    maxWidth: CONTENT_MAX_WIDTH,
     margin: "0 auto",
   },
   sectionTitle: {

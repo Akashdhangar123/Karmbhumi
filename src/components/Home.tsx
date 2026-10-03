@@ -4,11 +4,19 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { useLanguage } from "../context/LanguageContext";
 
-const DIRECTOR_PHOTO_SRC = "/director.jpg";
-const DIRECTOR_VIDEO_SRC = "/director-message.mp4";
+// ================= IMAGE ASSETS =================
+// Note: Place your uploaded images in public/img/ with these filenames
+const FOUNDER_SPEECH_IMG = "/img/founder-speech.jpg"; // Image 1: Dr. Shiv Karan addressing with Company Banner & Team
+const KARMBHUMI_MEDIA_IMG = "/img/karmbhumi-media.jpg"; // Image 2: Karmbhumi Logo with Press & News Microphones
+const FOUNDER_HONOR_IMG = "/img/founder-honor.jpg";   // Image 3: Dr. Shiv Karan at Pratibha Khoj Award Ceremony
+const DIRECTOR_PHOTO_SRC = "/img/dr.jpg";              // Founder Avatar / Profile
 
 const Home: React.FC = () => {
-  const [imgError, setImgError] = useState(false);
+  const [speechImgError, setSpeechImgError] = useState(false);
+  const [mediaImgError, setMediaImgError] = useState(false);
+  const [honorImgError, setHonorImgError] = useState(false);
+  const [founderAvatarError, setFounderAvatarError] = useState(false);
+
   const { t, lang } = useLanguage();
 
   const FACTS = lang === "hi" ? [
@@ -36,25 +44,21 @@ const Home: React.FC = () => {
       <Header />
 
       {/* ================= HERO SECTION (THEMED EXACTLY LIKE THE LOGO) ================= */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#07182D] via-[#0B2545] to-[#0A1D37] py-14 lg:py-10 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#07182D] via-[#0B2545] to-[#0A1D37] py-14 lg:py-16 text-white">
         
-        {/* 2. Tricolor Ambient Glow Orbs directly inspired by the Logo */}
-        {/* Saffron Glow (Top) */}
-        <div className="absolute -top-24 left-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-[#FF6B00] to-[#FF9933] opacity-25 blur-3xl" />
-        {/* Emerald Green Glow (Bottom) */}
-        <div className="absolute -bottom-24 right-1/4 h-96 w-96 rounded-full bg-gradient-to-tr from-[#138808] to-[#10b981] opacity-25 blur-3xl" />
-        {/* Soft Golden Sunlight (Center) */}
+        {/* Tricolor Ambient Glow Orbs */}
+        <div className="absolute -top-24 left-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-[#FF6B00] to-[#FF9933] opacity-25 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 right-1/4 h-96 w-96 rounded-full bg-gradient-to-tr from-[#138808] to-[#10b981] opacity-25 blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-amber-300/10 blur-[120px] pointer-events-none" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
             
-            {/* Left Column: Brand Hero & Logo Emblem */}
+            {/* Left Column: Brand Hero & Typography */}
             <div className="lg:col-span-7 space-y-6">
               
-              {/* Badge with Logo Mini Emblem */}
+              {/* Badge with Pulse Dot */}
               <div className="inline-flex items-center gap-2.5 rounded-full border border-amber-400/40 bg-slate-900/80 px-4 py-1.5 text-xs font-bold text-amber-300 backdrop-blur-md shadow-lg">
-                
                 <span className="flex h-2 w-2 rounded-full bg-[#FF6B00] animate-ping" />
                 <span>{t.home.badge}</span>
               </div>
@@ -103,50 +107,67 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: Founder Video Card + Logo Emblem Showcase */}
+            {/* Right Column: IMAGE 1 - Founder Keynote & Ground Leadership Showcase (Replaces Video) */}
             <div className="lg:col-span-5">
               <div className="relative mx-auto max-w-md lg:max-w-none">
+                
                 {/* Glowing Aura Ring */}
-                <div className="absolute -inset-1.5 rounded-3xl bg-gradient-to-r from-[#FF6B00] via-amber-300 to-[#138808] opacity-35 blur-xl" />
+                <div className="absolute -inset-1.5 rounded-3xl bg-gradient-to-r from-[#FF6B00] via-amber-300 to-[#138808] opacity-35 blur-xl pointer-events-none" />
 
                 <div className="relative rounded-2xl border border-white/20 bg-slate-900/90 shadow-2xl overflow-hidden backdrop-blur-xl">
                   
-                  {/* Top Bar with Karmbhoomi Emblem Badge */}
+                  {/* Top Bar with Live Tag */}
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 bg-slate-950/80">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
-                      <span className="text-xs font-semibold text-gray-300">
-                        {t.home.videoTitle}
+                      <span className="flex h-2.5 w-2.5 rounded-full bg-[#138808] animate-pulse" />
+                      <span className="text-xs font-semibold text-gray-200">
+                        {lang === "hi" ? "संस्थापक उद्बोधन एवं जनसंवाद" : "Founder Keynote & Public Address"}
                       </span>
                     </div>
-                    <span className="rounded bg-[#138808] px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                    <span className="rounded bg-[#138808] px-2.5 py-0.5 text-[10px] font-bold text-white shadow tracking-wide">
                       OFFICIAL
                     </span>
                   </div>
 
-                  {/* Video Player */}
-                  <div className="aspect-video w-full bg-black relative">
-                    <video
-                      className="h-full w-full object-cover"
-                      src={DIRECTOR_VIDEO_SRC}
-                      controls
-                      poster={DIRECTOR_PHOTO_SRC}
-                      preload="metadata"
-                    >
-                      Your browser does not support videos.
-                    </video>
+                  {/* Main Event Photo Display */}
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-950">
+                    {!speechImgError ? (
+                      <img
+                        src={FOUNDER_SPEECH_IMG}
+                        alt="Dr. Shiv Karan Karmayoddha addressing public meeting"
+                        onError={() => setSpeechImgError(true)}
+                        className="h-full w-full object-cover object-center transition-transform duration-700 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center text-gray-300 bg-slate-800">
+                        <span className="text-3xl mb-2">🏛️</span>
+                        <p className="text-sm font-bold text-amber-300">कर्मभूमि इंडिया लिमिटेड</p>
+                        <p className="text-xs text-gray-400 mt-1">संस्थापक उद्बोधन एवं सम्मेलन</p>
+                      </div>
+                    )}
+
+                    {/* Gradient Overlay & Badge */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                      <span className="rounded-lg bg-black/60 px-3 py-1 text-xs font-semibold text-amber-300 backdrop-blur-md border border-white/15">
+                        {lang === "hi" ? "✨ 18+ वर्षों का अटूट जनविश्वास" : "✨ 18+ Years of Public Trust"}
+                      </span>
+                      <span className="rounded-lg bg-[#FF6B00]/90 px-2.5 py-1 text-[11px] font-bold text-white shadow">
+                        Pan India
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Founder Profile Details */}
+                  {/* Founder Profile Details Footer */}
                   <div className="p-4 sm:p-5 flex items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800">
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div className="relative shrink-0">
-                        {!imgError ? (
+                        {!founderAvatarError ? (
                           <img
                             src={DIRECTOR_PHOTO_SRC}
                             alt={t.home.founderName}
-                            onError={() => setImgError(true)}
-                            className="h-14 w-14 rounded-full border-2 border-[#FF7A00] object-cover shadow-md"
+                            onError={() => setFounderAvatarError(true)}
+                            className="h-16 w-16 rounded-full border-2 border-[#FF7A00] object-top shadow-md"
                           />
                         ) : (
                           <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-[#FF7A00] bg-[#0B2545] font-bold text-white">
@@ -165,16 +186,13 @@ const Home: React.FC = () => {
                         <p className="text-xs font-semibold text-amber-400">
                           {t.home.founderRole}
                         </p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">
+                        <p className="text-[11px] text-gray-300 mt-0.5 line-clamp-1">
                           {t.home.founderDesc}
                         </p>
                       </div>
                     </div>
-
-                    {/* Logo Watermark Pill on the right */}
-                    <div className="hidden sm:flex shrink-0 h-12 w-12 items-center justify-center rounded-full bg-white/10 p-1 border border-white/20">
-                    </div>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -243,6 +261,94 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* ================= IMAGE 2: NATIONAL MEDIA & MISSION SPOTLIGHT ================= */}
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-orange-50/40 p-6 sm:p-10 shadow-lg">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12">
+            
+            {/* Left: Press & Media Graphic Card */}
+            <div className="lg:col-span-5 order-2 lg:order-1">
+              <div className="relative mx-auto max-w-sm rounded-2xl border-2 border-amber-300/60 bg-white p-2 shadow-xl shadow-slate-200/80">
+                <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-50 flex items-center justify-center">
+                  {!mediaImgError ? (
+                    <img
+                      src={KARMBHUMI_MEDIA_IMG}
+                      alt="Karmbhumi India Official Emblem and Press Coverage"
+                      onError={() => setMediaImgError(true)}
+                      className="h-full w-full object-contain p-2 transition-transform duration-500 hover:scale-105"
+                    />
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 text-[#0B2545] font-black text-2xl border border-blue-200">
+                        कर्मभूमि
+                      </div>
+                      <p className="mt-3 text-sm font-bold text-gray-700">प्रेस एवं मीडिया प्रसारण</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: National Mission & Transparent Vision Info */}
+            <div className="lg:col-span-7 order-1 lg:order-2 space-y-4">
+              <span className="inline-block rounded-full bg-orange-100 px-3.5 py-1 text-xs font-bold text-[#FF6B00] border border-orange-200">
+                {lang === "hi" ? "पारदर्शी नीतियां एवं राष्ट्रीय विजन" : "Transparent Governance & National Vision"}
+              </span>
+
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0B2545] tracking-tight">
+                {lang === "hi" 
+                  ? "राष्ट्र निर्माण में सहभागिता और जन-विश्वास का प्रतीक" 
+                  : "Symbol of Public Participation & National Trust"}
+              </h2>
+
+              <p className="text-sm sm:text-base leading-relaxed text-gray-700">
+                {lang === "hi"
+                  ? "कर्मभूमि इंडिया लिमिटेड संपूर्ण भारत में सहकारिता, रियल एस्टेट और उत्पाद एवं सेवा क्षेत्र के माध्यम से आत्मनिर्भरता की नई गाथा लिख रहा है। हमारा मुख्य संकल्प 'कर्मभूमि बैंक ऑफ इंडिया' की स्थापना कर प्रत्येक नागरिक को वित्तीय संबल प्रदान करना है।"
+                  : "Karmbhumi India Limited is scripting a new saga of self-reliance across India through cooperation, real estate, and product-service sectors. Our central mission is the establishment of Karmbhumi Bank of India."}
+              </p>
+
+              {/* Bullet Highlights */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="flex items-start gap-2.5 rounded-xl bg-white p-3.5 border border-gray-100 shadow-sm">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#138808] text-white text-xs font-bold">✓</span>
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">
+                      {lang === "hi" ? "प्रेस व मीडिया में पारदर्शी छवि" : "Transparent Media Presence"}
+                    </p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">
+                      {lang === "hi" ? "प्रत्येक कार्य सार्वजनिक व नियमबद्ध" : "Fully compliant and verified"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5 rounded-xl bg-white p-3.5 border border-gray-100 shadow-sm">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF6B00] text-white text-xs font-bold">✓</span>
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">
+                      {lang === "hi" ? "सहकारिता से पूंजी निर्माण" : "Cooperative Capital Growth"}
+                    </p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">
+                      {lang === "hi" ? "जन-जन की सामूहिक शक्ति" : "Collective strength of investors"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  to="/about"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-[#FF6B00] hover:text-[#e65100] transition-colors"
+                >
+                  <span>{lang === "hi" ? "संस्थान के बारे में विस्तार से जानें" : "Learn more about our institution"}</span>
+                  <span>→</span>
+                </Link>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* ================= 3 PILLARS SECTION ================= */}
       <section className="bg-slate-100/70 py-16 border-y border-gray-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -273,51 +379,74 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* ================= FOUNDER QUOTE HIGHLIGHT ================= */}
+      {/* ================= IMAGE 3: FOUNDER HIGHLIGHT & SOCIAL DEDICATION ================= */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="rounded-3xl border border-gray-200 bg-white p-8 sm:p-12 shadow-xl overflow-hidden relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             
-            <div className="lg:col-span-4 text-center">
-              <div className="relative inline-block">
-                {!imgError ? (
+            {/* Left: Dr. Shiv Karan at Pratibha Khoj Award Ceremony Photo */}
+            <div className="lg:col-span-5 text-center">
+              <div className="relative inline-block max-w-xs sm:max-w-sm rounded-2xl overflow-hidden border-4 border-[#FF6B00] shadow-xl">
+                {!honorImgError ? (
                   <img
-                    src={DIRECTOR_PHOTO_SRC}
-                    alt={t.home.founderName}
-                    onError={() => setImgError(true)}
-                    className="w-44 h-44 sm:w-52 sm:h-52 rounded-2xl object-cover border-4 border-[#FF6B00] shadow-lg mx-auto"
+                    src={FOUNDER_HONOR_IMG}
+                    alt="Dr. Shiv Karan Karmayoddha at Talent Search Award Ceremony"
+                    onError={() => setHonorImgError(true)}
+                    className="w-full h-80 sm:h-96 object-cover object-top transition-transform duration-500 hover:scale-105"
                   />
                 ) : (
-                  <div className="w-44 h-44 rounded-2xl bg-[#0B2545] flex items-center justify-center text-white text-2xl font-bold mx-auto border-4 border-[#FF6B00]">
-                    Founder
+                  <div className="w-64 h-80 bg-[#0B2545] flex items-center justify-center text-white text-xl font-bold p-4">
+                    प्रतिभा सम्मान समारोह
                   </div>
                 )}
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-[#0B2545] px-4 py-1 text-xs font-bold text-white shadow">
-                  मार्गदर्शक
+                
+                {/* Floating Ribbon Badge */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[90%] rounded-xl bg-[#0B2545]/90 backdrop-blur-md px-3 py-1.5 text-xs font-bold text-amber-300 shadow border border-white/20">
+                  {lang === "hi" ? "प्रतिभा सम्मान व सामाजिक सरोकार" : "Social Leadership & Youth Honor"}
                 </div>
               </div>
-              <h3 className="mt-5 text-lg font-black text-[#0B2545]">
+
+              <h3 className="mt-5 text-xl font-black text-[#0B2545]">
                 {t.home.founderName}
               </h3>
-              <p className="text-xs font-bold text-[#138808]">
+              <p className="text-xs font-bold text-[#138808] uppercase tracking-wide">
                 {t.home.founderRole}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {lang === "hi" ? "संस्थापक एवं मुख्य मार्गदर्शक" : "Founder & Chief Mentor"}
               </p>
             </div>
 
-            <div className="lg:col-span-8 lg:border-l lg:border-gray-200 lg:pl-10">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#FF6B00] bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
+            {/* Right: Founder Quote & Philosophical Vision */}
+            <div className="lg:col-span-7 lg:border-l lg:border-gray-200 lg:pl-10 space-y-5">
+              <span className="inline-block text-xs font-bold uppercase tracking-wider text-[#FF6B00] bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
                 {t.home.founderQuoteBadge}
               </span>
-              <blockquote className="mt-4 text-base sm:text-lg italic leading-relaxed text-gray-800 font-medium border-l-4 border-[#0B2545] pl-4 sm:pl-6">
-                {t.home.founderQuote}
+
+              <blockquote className="text-base sm:text-lg italic leading-relaxed text-gray-800 font-medium border-l-4 border-[#0B2545] pl-4 sm:pl-6 bg-slate-50/60 py-3 rounded-r-xl">
+                "{t.home.founderQuote}"
               </blockquote>
-              <div className="mt-6 flex items-center gap-4">
+
+              <p className="text-sm leading-relaxed text-gray-600">
+                {lang === "hi" 
+                  ? "शिक्षा, समाज उत्थान और आर्थिक स्वावलंबन के क्षेत्र में कर्मभूमि परिवार निरंतर अग्रसर है। प्रतिभाओं का सम्मान और गरीब व वंचित वर्ग को आगे बढ़ाना हमारी सर्वोच्च प्राथमिकता है।"
+                  : "The Karmbhumi family is constantly striving in education, social upliftment, and economic independence. Honoring talents and empowering every section of society is our top priority."}
+              </p>
+
+              <div className="pt-2 flex items-center gap-4">
                 <Link
                   to="/about"
-                  className="inline-flex items-center gap-2 text-sm font-bold text-[#0B2545] hover:text-[#138808] transition-colors"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#0B2545] px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-[#103565] transition-all"
                 >
                   <span>{t.home.btnReadMore}</span>
                   <span>→</span>
+                </Link>
+
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all"
+                >
+                  <span>{lang === "hi" ? "संपर्क करें" : "Contact Us"}</span>
                 </Link>
               </div>
             </div>
