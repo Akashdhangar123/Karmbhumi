@@ -1,163 +1,243 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useLanguage } from "../context/LanguageContext";
 
+const FONT = "'Manrope', 'Noto Sans Devanagari', 'Segoe UI', Arial, sans-serif";
+const NAVY = "#0B2545";
+const RUST = "#B84A12";
+
+const Arrow: React.FC<{ className?: string }> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+  </svg>
+);
+
 const About: React.FC = () => {
   const { t, lang } = useLanguage();
+  const hi = lang === "hi";
 
-  const VALUES = lang === "hi" ? [
-    { t: "अभिरक्षण व शिष्टाचार", d: "प्रत्येक निवेशक व सदस्य के सम्मान और संरक्षण की प्राथमिकता।" },
-    { t: "अभिक्रम व नवीनता", d: "पारंपरिक बाधाओं को तोड़कर आधुनिक वित्तीय सोच को अपनाना।" },
-    { t: "सत्यनिष्ठा व पारदर्शिता", d: "हर स्तर पर निष्पक्षता एवं विधिक मानकों का पूर्ण पालन।" },
-    { t: "गुणवत्ता व लाभ", d: "परिसंपत्तियों व निवेश पर समुचित एवं निरंतर प्रतिफल सुनिश्चित करना।" },
-    { t: "सहयोग व सम्बन्ध", d: "एक-दूसरे के हाथ पकड़कर आर्थिक स्वावलंबन का मार्ग प्रशस्त करना।" },
-    { t: "विश्वसनीयता व भरोसा", d: "शब्दों से नहीं, समयबद्ध परिणामों से विश्वास का निर्माण।" },
-  ] : [
-    { t: "Custody & Decorum", d: "Highest priority to the dignity, safety, and respect of every investor." },
-    { t: "Initiative & Innovation", d: "Transcending traditional constraints to foster modern financial mechanisms." },
-    { t: "Integrity & Transparency", d: "Uncompromising adherence to fairness, ethics, and legal compliance." },
-    { t: "Quality & Prosperity", d: "Delivering sustainable, asset-backed returns and enduring value creation." },
-    { t: "Cooperation & Relationship", d: "Empowering communities through collective handholding and cooperation." },
-    { t: "Credibility & Trust", d: "Earning enduring trust through punctual, verifiable outcomes." },
-  ];
+  // Same container as Home / Header / Footer
+  const container = "mx-auto w-full max-w-[1440px] px-5 sm:px-8";
 
-  const CULTURE = lang === "hi" 
-    ? ["दक्षता", "अनुकूलता", "सहयोग", "प्रतिबद्धता", "अनुशासन", "अधिकृत करना", "संवेदनशीलता", "उत्कृष्टता"]
+  const REGISTRATION = hi
+    ? [
+        { label: "वैधानिक स्थिति", value: "कॉर्पोरेट पहचान (CIN): U70102UP2012PLC053219" },
+        { label: "निगमन प्रमाणपत्र", value: "निगमन प्रमाणपत्र" },
+        { label: "व्यवसाय प्रारंभ", value: "व्यवसाय प्रारंभ" },
+        { label: "मंत्रालय", value: "कॉर्पोरेट कार्य मंत्रालय (MCA)" },
+      ]
+    : [
+        { label: "Legal Status", value: "Corporate Identity Number (CIN): U70102UP2012PLC053219" },
+        { label: "Incorporation Certificate", value: "Certificate of Incorporation" },
+        { label: "Commencement of Business", value: "Commencement of Business" },
+        { label: "Ministry", value: "Ministry of Corporate Affairs (MCA)" },
+      ];
+
+  const FACTS = hi
+    ? [
+        { label: "कंपनी", value: "कर्मभूमि इंडिया लिमिटेड" },
+        { label: "संस्थापक", value: "डॉ. शिव करन कर्मयोद्धा" },
+        { label: "मुख्य गतिविधियां", value: "रियल एस्टेट, उत्पाद एवं सेवाएँ" },
+        { label: "कंपनी का प्रकार", value: "पब्लिक लिमिटेड" },
+        { label: "निगमन", value: "22 अक्टूबर 2012" },
+        { label: "CIN", value: "U70102UP2012PLC053219" },
+      ]
+    : [
+        { label: "Company", value: "Karmbhumi India Limited" },
+        { label: "Founder", value: "Dr. Shiv Karan Karmayoddha" },
+        { label: "Core Activities", value: "Real Estate, Products & Services" },
+        { label: "Company Type", value: "Public Limited" },
+        { label: "Incorporation", value: "22 October 2012" },
+        { label: "CIN", value: "U70102UP2012PLC053219" },
+      ];
+
+  const VALUES = hi
+    ? [
+        { t: "संरक्षण एवं मर्यादा", d: "हर निवेशक की गरिमा, सुरक्षा और सम्मान को सर्वोच्च प्राथमिकता।" },
+        { t: "पहल एवं नवाचार", d: "पारंपरिक सीमाओं से आगे बढ़कर आधुनिक वित्तीय व्यवस्थाओं को बढ़ावा देना।" },
+        { t: "सत्यनिष्ठा एवं पारदर्शिता", d: "निष्पक्षता, नैतिकता और कानूनी अनुपालन का दृढ़ता से पालन।" },
+        { t: "गुणवत्ता एवं समृद्धि", d: "टिकाऊ, परिसंपत्ति-समर्थित रिटर्न और स्थायी मूल्य सृजन।" },
+        { t: "सहयोग एवं संबंध", d: "सामूहिक सहयोग और साथ के माध्यम से समुदायों का सशक्तिकरण।" },
+        { t: "विश्वसनीयता एवं भरोसा", d: "समयबद्ध और सत्यापन योग्य परिणामों से स्थायी भरोसा अर्जित करना।" },
+      ]
+    : [
+        { t: "Custody & Decorum", d: "Highest priority to the dignity, safety, and respect of every investor." },
+        { t: "Initiative & Innovation", d: "Transcending traditional constraints to foster modern financial mechanisms." },
+        { t: "Integrity & Transparency", d: "Uncompromising adherence to fairness, ethics, and legal compliance." },
+        { t: "Quality & Prosperity", d: "Delivering sustainable, asset-backed returns and enduring value creation." },
+        { t: "Cooperation & Relationship", d: "Empowering communities through collective handholding and cooperation." },
+        { t: "Credibility & Trust", d: "Earning enduring trust through punctual, verifiable outcomes." },
+      ];
+
+  const CULTURE = hi
+    ? ["दक्षता", "अनुकूलनशीलता", "सहयोग", "प्रतिबद्धता", "अनुशासन", "सशक्तिकरण", "सहानुभूति", "उत्कृष्टता"]
     : ["Efficiency", "Adaptability", "Collaboration", "Commitment", "Discipline", "Empowerment", "Empathy", "Excellence"];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-gray-900 antialiased">
+    <div className="min-h-screen bg-white text-slate-900 antialiased" style={{ fontFamily: FONT }}>
       <Header />
 
-      <section className="bg-[#0B2545] text-white py-16 text-center border-b-4 border-[#FF9933] relative overflow-hidden">
-        <div className="relative mx-auto max-w-4xl px-4">
-          <span className="inline-block text-xs font-bold uppercase tracking-wider text-amber-400 bg-white/10 px-3 py-1 rounded-full mb-3">
+      {/* ================= HERO ================= */}
+      <section className="bg-[#F1F5F9]">
+        <div className={`${container} py-12 sm:py-14`}>
+          <p className="text-[11px] font-semibold" style={{ color: RUST }}>
             {t.about.heroTag}
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
+          </p>
+          <h1
+            className="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl"
+            style={{ color: NAVY }}
+          >
             {t.about.heroTitle}
           </h1>
-          <p className="mt-4 text-sm sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-5 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-[15px]">
             {t.about.heroDesc}
           </p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
-            <div>
-              <span className="text-xs font-bold text-[#138808] uppercase tracking-wide">
-                {t.about.legalStatus}
-              </span>
-              <h2 className="text-xl font-black text-[#0B2545]">
-                {t.about.legalTitle}
-              </h2>
-            </div>
-            <a
-              href="https://www.mca21.gov.in"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#0B2545] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#133E72] transition-colors"
-            >
-              <span>{t.about.mcaBtn}</span>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-          </div>
+      {/* ================= REGISTRATION & VERIFICATION ================= */}
+      <section className={`${container} pt-12 sm:pt-14`}>
+        <h2 className="text-2xl font-bold sm:text-[32px]" style={{ color: NAVY }}>
+          {t.about.legalTitle}
+        </h2>
 
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-xl bg-slate-50 p-4 border border-gray-200">
-              <p className="text-xs font-bold text-gray-500">{t.footer.cinLabel}</p>
-              <p className="mt-1 text-sm font-mono font-bold text-[#0B2545]">U70102UP2012PLC053219</p>
+        <div className="mt-6 space-y-4">
+          {REGISTRATION.map((r) => (
+            <div key={r.label}>
+              <p className="text-[10px] font-semibold" style={{ color: RUST }}>
+                {r.label}
+              </p>
+              <p className="mt-1 text-sm text-slate-600">{r.value}</p>
             </div>
-            <div className="rounded-xl bg-slate-50 p-4 border border-gray-200">
-              <p className="text-xs font-bold text-gray-500">{lang === "hi" ? "निगमन प्रमाणपत्र" : "Incorporation Certificate"}</p>
-              <p className="mt-1 text-sm font-bold text-gray-900">Certificate of Incorporation</p>
-            </div>
-            <div className="rounded-xl bg-slate-50 p-4 border border-gray-200">
-              <p className="text-xs font-bold text-gray-500">{lang === "hi" ? "व्यवसाय प्रारंभ प्रमाणपत्र" : "Commencement of Business"}</p>
-              <p className="mt-1 text-sm font-bold text-gray-900">Commencement of Business</p>
-            </div>
-            <div className="rounded-xl bg-slate-50 p-4 border border-gray-200">
-              <p className="text-xs font-bold text-gray-500">{lang === "hi" ? "मंत्रालय" : "Ministry"}</p>
-              <p className="mt-1 text-sm font-bold text-gray-900">Ministry of Corporate Affairs (MCA)</p>
-            </div>
-          </div>
+          ))}
+
+          <a
+            href="https://www.mca21.gov.in"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block text-[10px] font-semibold hover:underline"
+            style={{ color: RUST }}
+          >
+            {t.about.mcaBtn}
+          </a>
         </div>
       </section>
 
-      {/* Vision & Mission */}
-      <section className="bg-slate-100 py-16 border-y border-gray-200 mt-14">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-[#FF9933] font-bold text-xl mb-4">
-                🔭
-              </div>
-              <h3 className="text-xl font-black text-[#0B2545]">{t.about.visionTitle}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-gray-700">{t.about.visionDesc}</p>
-            </div>
+      {/* ================= COMPANY AT A GLANCE ================= */}
+      <section className={`${container} pb-14 pt-14 sm:pb-16 sm:pt-16`}>
+        <h2 className="text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
+          {hi ? "एक नज़र में कंपनी" : "Company at a Glance"}
+        </h2>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-[#138808] font-bold text-xl mb-4">
-                🎯
-              </div>
-              <h3 className="text-xl font-black text-[#0B2545]">{t.about.missionTitle}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-gray-700">{t.about.missionDesc}</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values & Culture */}
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#138808] bg-green-50 px-3 py-1 rounded-full border border-green-200">
-            {t.about.valuesBadge}
-          </span>
-          <h2 className="mt-3 text-2xl sm:text-3xl font-black text-[#0B2545]">
-            {t.about.valuesTitle}
-          </h2>
-          <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-[#138808]" />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {VALUES.map((v) => (
-            <div key={v.t} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-              <h4 className="text-base font-bold text-[#0B2545]">{v.t}</h4>
-              <p className="mt-2 text-xs leading-relaxed text-gray-600">{v.d}</p>
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-3.5">
+          {FACTS.map((f) => (
+            <div key={f.label} className="rounded-md bg-[#EEF2F6] px-4 py-4">
+              <p className="text-[10px] font-medium text-slate-500">{f.label}</p>
+              <p className="mt-1.5 text-sm font-semibold leading-snug" style={{ color: NAVY }}>
+                {f.value}
+              </p>
             </div>
           ))}
         </div>
+      </section>
 
-        <div className="mt-10 rounded-2xl bg-white p-6 border border-gray-200 shadow-sm text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">
-            {lang === "hi" ? "संगठनात्मक संस्कृति के 8 स्तम्भ" : "8 Key Organizational Cultural Pillars"}
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {CULTURE.map((c) => (
-              <span
-                key={c}
-                className="rounded-xl border border-gray-200 bg-slate-50 px-4 py-2 text-xs font-bold text-gray-800"
-              >
-                ✓ {c}
-              </span>
-            ))}
+      {/* ================= VISION & MISSION ================= */}
+      <section className="bg-[#F1F5F9]">
+        <div className={`${container} py-10 sm:py-12`}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-md bg-white p-5 shadow-sm">
+              <p className="text-[9px] font-semibold" style={{ color: RUST }}>
+                {hi ? "विज़न" : "Vision"}
+              </p>
+              <h3 className="mt-2 text-base font-bold" style={{ color: NAVY }}>
+                {t.about.visionTitle}
+              </h3>
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-600">
+                {t.about.visionDesc}
+              </p>
+            </div>
+
+            <div className="rounded-md bg-white p-5 shadow-sm">
+              <p className="text-[9px] font-semibold" style={{ color: RUST }}>
+                {hi ? "मिशन" : "Mission"}
+              </p>
+              <h3 className="mt-2 text-base font-bold" style={{ color: NAVY }}>
+                {t.about.missionTitle}
+              </h3>
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-600">
+                {t.about.missionDesc}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Dedication Banner */}
-      <section className="mx-auto max-w-4xl px-4 pb-16">
-        <div className="rounded-3xl bg-gradient-to-r from-[#0B2545] to-[#133E72] p-8 sm:p-10 text-center text-white shadow-xl">
-          <h3 className="text-xl font-bold text-amber-400">{t.about.dedicationTitle}</h3>
-          <p className="mt-4 text-base leading-relaxed text-gray-200 max-w-2xl mx-auto">
-            {t.about.dedicationQuote}
+      {/* ================= VALUES & CULTURE ================= */}
+      <section className={`${container} py-12 sm:py-14`}>
+        <h2 className="text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
+          {t.about.valuesTitle}
+        </h2>
+
+        <div className="mt-6 space-y-5">
+          {VALUES.map((v) => (
+            <div key={v.t}>
+              <h3 className="text-sm font-bold sm:text-[15px]" style={{ color: NAVY }}>
+                {v.t}
+              </h3>
+              <p className="mt-2 text-xs text-slate-600">{v.d}</p>
+            </div>
+          ))}
+
+          <div>
+            <h3 className="text-sm font-bold sm:text-[15px]" style={{ color: NAVY }}>
+              {hi ? "8 प्रमुख संगठनात्मक सांस्कृतिक स्तंभ" : "8 Key Organizational Cultural Pillars"}
+            </h3>
+            <p className="mt-3 text-xs text-slate-600">{CULTURE.join(" · ")}</p>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold sm:text-[15px]" style={{ color: NAVY }}>
+              {t.about.dedicationTitle}
+            </h3>
+            <p className="mt-3 max-w-4xl text-xs leading-relaxed text-slate-600">
+              “{t.about.dedicationQuote}”
+            </p>
+            <p className="mt-4 text-[9px] font-semibold" style={{ color: RUST }}>
+              — {t.home.founderName}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= JOIN CTA ================= */}
+      <section className="bg-[#E6EDF4]">
+        <div className={`${container} py-12 sm:py-14`}>
+          <p className="text-[10px] font-semibold" style={{ color: RUST }}>
+            {hi ? "हमसे जुड़ें" : "Join Us"}
           </p>
-          <p className="mt-4 text-xs font-semibold text-gray-400">— {t.home.founderName}</p>
+          <h2
+            className="mt-3 max-w-4xl text-2xl font-bold leading-tight sm:text-[32px]"
+            style={{ color: NAVY }}
+          >
+            {hi
+              ? "कर्मभूमि बैंक ऑफ़ इंडिया के आर्थिक आंदोलन से जुड़ें"
+              : "Join the Karmbhumi Bank of India Economic Movement"}
+          </h2>
+          <p className="mt-4 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-[13px]">
+            {hi
+              ? "अपना आर्थिक भविष्य सुरक्षित करें और एक समतामूलक व आत्मनिर्भर भारत के निर्माण में योगदान दें। आज ही हमारी विश्वसनीय निवेश योजनाएँ देखें।"
+              : "Secure your financial future and contribute toward an egalitarian and self-reliant India. Explore our trusted investment schemes today."}
+          </p>
+          <Link
+            to="/contact"
+            className="mt-6 inline-flex items-center gap-2 rounded-md px-5 py-3 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
+            style={{ backgroundColor: RUST }}
+          >
+            <span>{hi ? "संपर्क करें" : "Contact Us"}</span>
+            <Arrow />
+          </Link>
         </div>
       </section>
 
@@ -166,4 +246,4 @@ const About: React.FC = () => {
   );
 };
 
-export default About;
+export default About; 

@@ -1,7 +1,12 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useLanguage } from "../context/LanguageContext";
+
+const FONT = "'Manrope', 'Noto Sans Devanagari', 'Segoe UI', Arial, sans-serif";
+const NAVY = "#0B2545";
+const RUST = "#B84A12";
 
 const monthlyRD = [
   { sr: 1, monthly: 300, plot: 18, deposit5yr: 18000, refund7yr: 36000 },
@@ -35,137 +40,187 @@ const chequePlan = [
 
 const fmt = (n: number) => n.toLocaleString("en-IN");
 
+const Arrow: React.FC<{ className?: string }> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+  </svg>
+);
+
+type TabId = "rd" | "yearly" | "cheque";
+
 const InvestmentPlans: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"rd" | "yearly" | "cheque">("rd");
-  const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState<TabId>("rd");
+  const { t, lang } = useLanguage();
+  const hi = lang === "hi";
+  const sqft = hi ? "वर्ग फुट" : "sq.ft.";
+
+  // Same container as Home / About / Header / Footer
+  const container = "mx-auto w-full max-w-[1440px] px-5 sm:px-8";
+
+  const tabs: { id: TabId; label: string }[] = [
+    { id: "rd", label: t.plans.tabRd },
+    { id: "yearly", label: t.plans.tabYearly },
+    { id: "cheque", label: t.plans.tabCheque },
+  ];
+  const activeLabel = tabs.find((x) => x.id === activeTab)?.label;
+
+  // shared table classes (Figma look)
+  const th = "px-4 py-3 text-left text-[9px] font-semibold sm:text-[10px]";
+  const td = "px-4 py-5 text-left text-xs text-slate-600 sm:text-[13px]";
+
+  let head: string[] = [];
+  let rows: React.ReactNode[][] = [];
+
+  if (activeTab === "rd") {
+    head = [
+      t.plans.srNo,
+      t.plans.monthlyDeposit,
+      `${t.plans.plotSize} (${sqft})`,
+      t.plans.totalDeposit5Yr,
+      t.plans.refundable7Yr,
+    ];
+    rows = monthlyRD.map((r) => [
+      r.sr,
+      `₹${fmt(r.monthly)}`,
+      `${r.plot} ${sqft}`,
+      `₹${fmt(r.deposit5yr)}`,
+      `₹${fmt(r.refund7yr)}`,
+    ]);
+  } else if (activeTab === "yearly") {
+    head = [
+      t.plans.yearlyDeposit,
+      t.plans.totalDeposit5Yr,
+      t.plans.plotSize,
+      t.plans.valAfter6Yr,
+      t.plans.valAfter11Yr,
+    ];
+    rows = yearlyRD.map((r) => [
+      `₹${fmt(r.yearly)}`,
+      `₹${fmt(r.deposit5yr)}`,
+      `${r.plot} ${sqft}`,
+      `₹${fmt(r.after6yr)}`,
+      `₹${fmt(r.after11yr)}`,
+    ]);
+  } else {
+    head = [
+      t.plans.srNo,
+      t.plans.monthlyDeposit,
+      t.plans.rate,
+      t.plans.grossAmount,
+      t.plans.netBenefit,
+    ];
+    rows = chequePlan.map((r) => [
+      r.sr,
+      `₹${fmt(r.amount)}`,
+      r.rate,
+      `₹${fmt(r.gross)}`,
+      `+₹${fmt(r.benefit)}`,
+    ]);
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-gray-900 antialiased">
+    <div className="min-h-screen bg-white text-slate-900 antialiased" style={{ fontFamily: FONT }}>
       <Header />
 
-      <section className="bg-[#0B2545] text-white py-16 text-center border-b-4 border-[#FF9933]">
-        <div className="mx-auto max-w-4xl px-4">
-          <span className="inline-block text-xs font-bold uppercase tracking-wider text-amber-400 bg-white/10 px-3 py-1 rounded-full mb-3">
+      {/* ================= HERO ================= */}
+      <section className="bg-[#F1F5F9]">
+        <div className={`${container} py-12 sm:py-14`}>
+          <p className="text-[11px] font-semibold" style={{ color: RUST }}>
             {t.plans.badge}
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+          </p>
+          <h1
+            className="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl"
+            style={{ color: NAVY }}
+          >
             {t.plans.title}
           </h1>
-          <p className="mt-4 text-sm sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-5 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-[13px]">
             {t.plans.desc}
           </p>
         </div>
       </section>
 
-      {/* Tabs */}
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 -mt-7 relative z-20">
-        <div className="flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-white p-2.5 shadow-xl border border-gray-200">
-          {[
-            { id: "rd", label: t.plans.tabRd },
-            { id: "yearly", label: t.plans.tabYearly },
-            { id: "cheque", label: t.plans.tabCheque },
-          ].map((tab) => (
+      {/* ================= PLANS ================= */}
+      <section className={`${container} py-10 sm:py-12`}>
+        {/* tab links */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`rounded-xl px-5 py-3 text-xs sm:text-sm font-bold transition-all ${
-                activeTab === tab.id
-                  ? "bg-[#0B2545] text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`text-[10px] font-semibold transition-opacity hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                activeTab === tab.id ? "underline underline-offset-4 opacity-100" : "opacity-70"
               }`}
+              style={{ color: RUST }}
+              aria-pressed={activeTab === tab.id}
             >
               {tab.label}
             </button>
           ))}
         </div>
+
+        {/* active plan title */}
+        <h2 className="mt-4 text-2xl font-bold sm:text-[32px]" style={{ color: NAVY }}>
+          {activeLabel}
+        </h2>
+
+        {/* table */}
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full min-w-[650px] border-collapse">
+            <thead className="bg-[#F1F5F9]">
+              <tr>
+                {head.map((h, i) => (
+                  <th key={i} className={th} style={{ color: RUST }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, ri) => (
+                <tr key={ri}>
+                  {row.map((cell, ci) => (
+                    <td key={ci} className={td}>
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
-      {activeTab === "rd" && (
-        <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <table className="w-full min-w-[650px] text-center text-sm">
-              <thead className="bg-[#0B2545] text-white">
-                <tr>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.srNo}</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.monthlyDeposit}</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.plotSize} (sq.ft.)</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.totalDeposit5Yr}</th>
-                  <th className="px-4 py-3.5 font-bold text-amber-300">{t.plans.refundable7Yr}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {monthlyRD.map((r) => (
-                  <tr key={r.sr} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 text-gray-500">{r.sr}</td>
-                    <td className="px-4 py-3 font-bold text-gray-900">₹{fmt(r.monthly)}</td>
-                    <td className="px-4 py-3 text-gray-700">{r.plot} sq.ft.</td>
-                    <td className="px-4 py-3 text-gray-700">₹{fmt(r.deposit5yr)}</td>
-                    <td className="px-4 py-3 font-black text-[#138808]">₹{fmt(r.refund7yr)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {activeTab === "yearly" && (
-        <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <table className="w-full min-w-[650px] text-center text-sm">
-              <thead className="bg-[#0B2545] text-white">
-                <tr>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.yearlyDeposit}</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.totalDeposit5Yr}</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.plotSize}</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.valAfter6Yr}</th>
-                  <th className="px-4 py-3.5 font-bold text-amber-300">{t.plans.valAfter11Yr}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {yearlyRD.map((r) => (
-                  <tr key={r.yearly} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-bold text-gray-900">₹{fmt(r.yearly)}</td>
-                    <td className="px-4 py-3 text-gray-700">₹{fmt(r.deposit5yr)}</td>
-                    <td className="px-4 py-3 text-gray-700">{r.plot} sq.ft.</td>
-                    <td className="px-4 py-3 font-semibold text-gray-800">₹{fmt(r.after6yr)}</td>
-                    <td className="px-4 py-3 font-black text-[#138808]">₹{fmt(r.after11yr)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-
-      {activeTab === "cheque" && (
-        <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-14">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <table className="w-full min-w-[600px] text-center text-sm">
-              <thead className="bg-[#0B2545] text-white">
-                <tr>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.srNo}</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.monthlyDeposit}</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.rate}</th>
-                  <th className="px-4 py-3.5 font-bold">{t.plans.grossAmount}</th>
-                  <th className="px-4 py-3.5 font-bold text-amber-300">{t.plans.netBenefit}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {chequePlan.map((r) => (
-                  <tr key={r.sr} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 text-gray-500">{r.sr}</td>
-                    <td className="px-4 py-3 font-bold text-gray-900">₹{fmt(r.amount)}</td>
-                    <td className="px-4 py-3 text-gray-700 font-semibold">{r.rate}</td>
-                    <td className="px-4 py-3 text-gray-800">₹{fmt(r.gross)}</td>
-                    <td className="px-4 py-3 font-black text-[#138808]">+₹{fmt(r.benefit)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+      {/* ================= JOIN CTA ================= */}
+      <section className="bg-[#E6EDF4]">
+        <div className={`${container} py-12 sm:py-14`}>
+          <p className="text-[10px] font-semibold" style={{ color: RUST }}>
+            {hi ? "हमसे जुड़ें" : "Join Us"}
+          </p>
+          <h2
+            className="mt-3 max-w-4xl text-2xl font-bold leading-tight sm:text-[32px]"
+            style={{ color: NAVY }}
+          >
+            {hi
+              ? "कर्मभूमि बैंक ऑफ़ इंडिया के आर्थिक आंदोलन से जुड़ें"
+              : "Join the Karmbhumi Bank of India Economic Movement"}
+          </h2>
+          <p className="mt-4 max-w-md text-xs leading-relaxed text-slate-600 sm:text-[13px]">
+            {hi
+              ? "अपना आर्थिक भविष्य सुरक्षित करें और एक समतामूलक व आत्मनिर्भर भारत के निर्माण में योगदान दें। आज ही हमारी विश्वसनीय निवेश योजनाएँ देखें।"
+              : "Secure your financial future and contribute toward an egalitarian and self-reliant India. Explore our trusted investment schemes today."}
+          </p>
+          <Link
+            to="/contact"
+            className="mt-6 inline-flex items-center gap-2 rounded-md px-5 py-3 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
+            style={{ backgroundColor: RUST }}
+          >
+            <span>{hi ? "संपर्क करें" : "Contact Us"}</span>
+            <Arrow />
+          </Link>
+        </div>
+      </section>
 
       <Footer />
     </div>

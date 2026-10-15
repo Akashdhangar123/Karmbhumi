@@ -7,6 +7,7 @@ import KarmbhoomiBank from "../pages/KarmbhoomiBank";
 import InvestmentPlans from "../pages/InvestmentPlans";
 import Contact from "../pages/Contact";
 import { LanguageProvider, useLanguage } from "../context/LanguageContext";
+import AuthorProfile from "../pages/Authoprofile";
 
 const NotFound = () => {
   const { lang } = useLanguage();
@@ -43,7 +44,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/karmbhoomi-bank" element={<KarmbhoomiBank />} />
         <Route path="/investment-plans" element={<InvestmentPlans />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="AuthorProfile" element={<AuthorProfile />} />
       </Routes>
     </LanguageProvider>
   );
