@@ -45,6 +45,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/investment-plans" element={<InvestmentPlans />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="AuthorProfile" element={<AuthorProfile />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </LanguageProvider>
   );
