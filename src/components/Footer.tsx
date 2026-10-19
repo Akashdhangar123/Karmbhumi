@@ -28,9 +28,9 @@ const Footer: React.FC = () => {
           {/* Brand */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 shrink-0 overflow-hidden rounded-md bg-white">
+              <div className="h-22 w-22 shrink-0 overflow-hidden">
                 <img
-                  src="/Karmbhumi.jpeg"
+                  src="/img/newlogo.png"
                   alt="कर्मभूमि लोगो"
                   className="h-full w-full object-contain"
                 />
@@ -134,13 +134,13 @@ const Footer: React.FC = () => {
                 className={`px-2 py-1 ${hi ? "text-white" : "text-slate-500"}`}
                 style={hi ? { backgroundColor: NAVY } : undefined}
               >
-                हिं
+                EN
               </span>
               <span
                 className={`px-2 py-1 ${!hi ? "text-white" : "text-slate-500"}`}
                 style={!hi ? { backgroundColor: NAVY } : undefined}
               >
-                EN
+                हिं
               </span>
             </button>
 

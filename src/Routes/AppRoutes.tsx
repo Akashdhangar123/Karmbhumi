@@ -1,13 +1,16 @@
 import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import ScrollToTop from "../components/ScrollToTop";
+import ProtectedRoute from "../components/ProtectedRoute";
 import Home from "../components/Home";
 import About from "../pages/About";
 import KarmbhoomiBank from "../pages/KarmbhoomiBank";
 import InvestmentPlans from "../pages/InvestmentPlans";
 import Contact from "../pages/Contact";
+import CPanel from "../pages/CPanel";
 import { LanguageProvider, useLanguage } from "../context/LanguageContext";
 import AuthorProfile from "../pages/Authoprofile";
+import SeoManager from "../components/SeoManager";
 
 const NotFound = () => {
   const { lang } = useLanguage();
@@ -20,7 +23,7 @@ const NotFound = () => {
         {lang === "hi" ? "पेज नहीं मिला" : "Page Not Found"}
       </h1>
       <p className="mt-2 text-sm text-gray-600 max-w-sm">
-        {lang === "hi" 
+        {lang === "hi"
           ? "क्षमा करें, जिस पृष्ठ की आप तलाश कर रहे हैं वह उपलब्ध नहीं है या स्थानांतरित कर दिया गया है।"
           : "Sorry, the page you are looking for does not exist or has been relocated."}
       </p>
@@ -38,13 +41,28 @@ const AppRoutes: React.FC = () => {
   return (
     <LanguageProvider>
       <ScrollToTop />
+      <SeoManager />
       <Routes>
+        {/* Public pages */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/karmbhoomi-bank" element={<KarmbhoomiBank />} />
         <Route path="/investment-plans" element={<InvestmentPlans />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="AuthorProfile" element={<AuthorProfile />} />
+        <Route path="/AuthorProfile" element={<AuthorProfile />} />
+
+        {/* Auth */}
+
+        {/* Protected: sirf super_admin */}
+        <Route
+          path="/cpanel"
+          element={
+            <ProtectedRoute roles={["super_admin"]}>
+              <CPanel />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </LanguageProvider>

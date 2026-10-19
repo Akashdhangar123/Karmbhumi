@@ -1,19 +1,18 @@
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./Routes/AppRoutes";
+import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
 
 /**
- * App.tsx
- * ---------------------------------------------------------
- * Root component. Wraps the whole app in BrowserRouter so
- * that routing (AppRoutes.tsx) works, and renders the
- * matched page.
- * ---------------------------------------------------------
+ * Root component. BrowserRouter routing ke liye, AuthProvider login
+ * state poori app me share karne ke liye.
  */
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
+import LoginModal from "./LoginModal";
 
 const FONT = "'Manrope', 'Noto Sans Devanagari', 'Segoe UI', Arial, sans-serif";
 const NAVY = "#0B2545";
@@ -8,8 +10,11 @@ const RUST = "#B84A12";
 
 const Header: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { lang, toggleLang, t } = useLanguage();
+  const { user, logout } = useAuth();
   const hi = lang === "hi";
 
   const NAV_ITEMS = [
@@ -22,6 +27,17 @@ const Header: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  async function handleLogout() {
+  setOpen(false);
+  // Pehle home pe jao, taaki protected route user null hote hi kahin aur redirect na kare
+  navigate("/", { replace: true });
+  try {
+    await logout();
+  } catch (err) {
+    console.error("logout failed:", err);
+  }
+}
+
   const LangPill = () => (
     <button
       type="button"
@@ -33,13 +49,13 @@ const Header: React.FC = () => {
         className={`px-2 py-1 ${hi ? "text-white" : "text-slate-500"}`}
         style={hi ? { backgroundColor: NAVY } : undefined}
       >
-        हिं
+       EN
       </span>
       <span
         className={`px-2 py-1 ${!hi ? "text-white" : "text-slate-500"}`}
         style={!hi ? { backgroundColor: NAVY } : undefined}
       >
-        EN
+        हिं
       </span>
     </button>
   );
@@ -48,7 +64,7 @@ const Header: React.FC = () => {
     <header className="sticky top-0 z-50 w-full bg-white" style={{ fontFamily: FONT }}>
       {/* Top bar */}
       <div className="text-white" style={{ backgroundColor: NAVY }}>
-        <div className="mx-auto flex h-[26px] w-full max-w-[1440x] items-center justify-between px-5 sm:px-8">
+        <div className="mx-auto flex h-[26px] w-full max-w-[1440px] items-center justify-between px-5 sm:px-8">
           <span className="text-[11px] font-normal">
             {hi
               ? "कर्मभूमि इंडिया लिमिटेड · जहाँ कर्म ही पूजा है"
@@ -63,12 +79,8 @@ const Header: React.FC = () => {
         <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-5 sm:px-8">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-md bg-white">
-              <img
-                src="/Karmbhumi.jpeg"
-                alt="कर्मभूमि लोगो"
-                className="h-full w-full object-contain"
-              />
+            <div className="h-19 w-19 shrink-0 overflow-hidden ">
+              <img src="/img/newlogo.png" alt="कर्मभूमि लोगो" className="h-full w-full object-contain" />
             </div>
             <div className="leading-tight">
               <p className="text-lg font-bold tracking-tight" style={{ color: NAVY }}>
@@ -99,17 +111,49 @@ const Header: React.FC = () => {
             })}
           </nav>
 
-          {/* Join button */}
-          <Link
-            to="/contact"
-            className="hidden items-center gap-2 rounded-md px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-125 active:scale-95 md:inline-flex"
-            style={{ backgroundColor: NAVY }}
-          >
-            <span>{t.nav.join}</span>
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
+          {/* Right side: Login/CPanel + Join */}
+          <div className="hidden items-center gap-3 md:flex">
+            {user ? (
+              <>
+                {user.role === "super_admin" && (
+                  <Link
+                    to="/cpanel"
+                    className="rounded-md border px-4 py-2.5 text-[13px] font-semibold transition-colors hover:bg-slate-50"
+                    style={{ borderColor: NAVY, color: NAVY }}
+                  >
+                    CPanel
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="rounded-md border border-slate-300 px-4 py-2.5 text-[13px] font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+                >
+                  {hi ? "लॉगआउट" : "Logout"}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setLoginOpen(true)}
+                className="rounded-md border px-4 py-2.5 text-[13px] font-semibold transition-colors hover:bg-slate-50"
+                style={{ borderColor: NAVY, color: NAVY }}
+              >
+                {hi ? "लॉगिन" : "Login"}
+              </button>
+            )}
+
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:brightness-125 active:scale-95"
+              style={{ backgroundColor: NAVY }}
+            >
+              <span>{t.nav.join}</span>
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
+          </div>
 
           {/* Mobile toggle */}
           <button
@@ -151,6 +195,41 @@ const Header: React.FC = () => {
                 </Link>
               );
             })}
+
+            {user ? (
+              <>
+                {user.role === "super_admin" && (
+                  <Link
+                    to="/cpanel"
+                    onClick={() => setOpen(false)}
+                    className="mt-2 flex items-center justify-center rounded-md border px-4 py-3 text-sm font-semibold"
+                    style={{ borderColor: NAVY, color: NAVY }}
+                  >
+                    CPanel
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="mt-2 flex items-center justify-center rounded-md border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700"
+                >
+                  {hi ? "लॉगआउट" : "Logout"}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  setLoginOpen(true);
+                }}
+                className="mt-2 flex items-center justify-center rounded-md border px-4 py-3 text-sm font-semibold"
+                style={{ borderColor: NAVY, color: NAVY }}
+              >
+                {hi ? "लॉगिन" : "Login"}
+              </button>
+            )}
+
             <Link
               to="/contact"
               onClick={() => setOpen(false)}
@@ -162,6 +241,8 @@ const Header: React.FC = () => {
           </nav>
         </div>
       )}
+
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </header>
   );
 };

@@ -3,14 +3,13 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useLanguage } from "../context/LanguageContext";
 import { INDIAN_STATES, STATE_DISTRICTS } from "../data/indiaStatesDistricts";
+import { submitContactForm } from "../api/contactApi";
 
 const FONT = "'Manrope', 'Noto Sans Devanagari', 'Segoe UI', Arial, sans-serif";
 const NAVY = "#0B2545";
 const RUST = "#B84A12";
 
-// Free, public, no-key-required India Post Pincode API.
-// Returns real Post Office / Block / District / State data for a given 6-digit PIN code.
-// Docs: https://www.postalpincode.in/Api-Details
+// Free, public, no-key-required India Post Pincode API
 const PINCODE_API = "https://api.postalpincode.in/pincode/";
 
 interface PostOfficeResult {
@@ -35,71 +34,83 @@ const PinIcon: React.FC = () => (
   </svg>
 );
 
+const EMPTY_FORM = {
+  name: "",
+  fatherName: "",
+  motherName: "",
+  address: "",
+  village: "",
+  pincode: "",
+  postOffice: "",
+  block: "",
+  district: "",
+  state: "",
+  education: "",
+  occupation: "",
+  phone: "",
+  email: "",
+  website: "", // honeypot
+};
+
 const Contact: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
-  const [manualMode, setManualMode] = useState(false); // fallback if API/internet unavailable
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [manualMode, setManualMode] = useState(false);
   const [pinStatus, setPinStatus] = useState<PinStatus>("idle");
   const [postOffices, setPostOffices] = useState<PostOfficeResult[]>([]);
-
-  const [form, setForm] = useState({
-    name: "",
-    parentName: "",
-    address: "",
-    village: "",
-    pincode: "",
-    postOffice: "",
-    block: "",
-    district: "",
-    state: "",
-    education: "",
-    occupation: "",
-    phone: "",
-    email: "",
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const { t, lang } = useLanguage();
   const hi = lang === "hi";
 
-  // Same container as Home / About / Header / Footer
   const container = "mx-auto w-full max-w-[1440px] px-5 sm:px-8";
 
   const L = hi
     ? {
         formTitle: "संपर्क फॉर्म",
         formDesc: "कृपया अपना पूरा विवरण सही-सही भरें।",
+        secPersonal: "व्यक्तिगत विवरण",
+        secAddress: "पता",
+        secBackground: "पृष्ठभूमि",
         name: "पूरा नाम",
-        parentName: "पिता का नाम / माता का नाम",
-        address: "पता",
+        parentName: "पिता / माता का नाम",
+        address: "पूरा पता",
         village: "गाँव",
         pincode: "पिन कोड",
         pincodeHelp: "6 अंकों का पिन कोड दर्ज करें — राज्य, जिला और ब्लॉक अपने आप भर जाएँगे",
         pincodeLoading: "जानकारी खोजी जा रही है...",
         pincodeError: "यह पिन कोड नहीं मिला, कृपया दोबारा जाँचें या मैन्युअल तरीका इस्तेमाल करें",
-        postOffice: "पोस्ट ऑफिस चुनें",
+        postOffice: "पोस्ट ऑफिस",
         selectPostOffice: "पोस्ट ऑफिस चुनें",
         state: "राज्य",
         district: "जिला",
         block: "ब्लॉक",
+        autoFilled: "अपने आप भरेगा",
         selectState: "राज्य चुनें",
         selectDistrict: "पहले राज्य चुनें",
         selectDistrictReady: "जिला चुनें",
         blockPlaceholderLocked: "पहले जिला चुनें",
-        blockPlaceholderReady: "अपना ब्लॉक/तहसील लिखें",
+        blockPlaceholderReady: "ब्लॉक / तहसील लिखें",
         education: "शिक्षा",
         occupation: "व्यवसाय",
         phone: "संपर्क नंबर",
         email: "ईमेल आईडी",
         submit: "फॉर्म जमा करें",
+        submitting: "जमा हो रहा है...",
+        required: "* आवश्यक फ़ील्ड",
         manualToggleOn: "पिन कोड नहीं मिल रहा? यहां स्वयं भरें",
-        manualToggleOff: "पिन कोड से अपने आप जानकारी भरें",
+        manualToggleOff: "पिन कोड से अपने आप भरें",
         phName: "उदा. राहुल वर्मा",
-        phParent: "उदा. सुरेश वर्मा / सुनीता देवी",
-        docsTitle: "भागीदारी के लिए आवश्यक दस्तावेज़",
+        phParent: "उदा. सुरेश वर्मा",
         website: "आधिकारिक वेबसाइट",
       }
     : {
         formTitle: "Contact Form",
         formDesc: "Please fill in all your details accurately.",
+        secPersonal: "Personal details",
+        secAddress: "Address",
+        secBackground: "Background",
         name: "Full Name",
         parentName: "Father's Name / Mother's Name",
         address: "Address",
@@ -108,26 +119,28 @@ const Contact: React.FC = () => {
         pincodeHelp: "Enter 6-digit PIN code — State, District & Block fill in automatically",
         pincodeLoading: "Looking up details...",
         pincodeError: "PIN code not found. Please check, or use manual entry.",
-        postOffice: "Select Post Office",
+        postOffice: "Post Office",
         selectPostOffice: "Select Post Office",
         state: "State",
         district: "District",
         block: "Block",
+        autoFilled: "Auto-filled",
         selectState: "Select State",
         selectDistrict: "Select state first",
         selectDistrictReady: "Select District",
         blockPlaceholderLocked: "Select district first",
-        blockPlaceholderReady: "Enter your Block / Tehsil",
+        blockPlaceholderReady: "Enter Block / Tehsil",
         education: "Education",
         occupation: "Occupation",
         phone: "Contact No.",
         email: "Email ID",
         submit: "Submit Form",
+        submitting: "Submitting...",
+        required: "* Required fields",
         manualToggleOn: "Can't find your PIN code? Fill address manually",
         manualToggleOff: "Auto-fill address using PIN code instead",
         phName: "e.g. Rahul Verma",
-        phParent: "e.g. Suresh Verma / Sunita Devi",
-        docsTitle: "Documents required for participation",
+        phParent: "e.g. Suresh Verma",
         website: "Official Website",
       };
 
@@ -147,20 +160,13 @@ const Contact: React.FC = () => {
         "₹250 Registration Fee (Non-Refundable)",
       ];
 
-  // Manual-mode district options (depends on manually selected state)
   const districtOptions = useMemo(
     () => (form.state ? STATE_DISTRICTS[form.state] || [] : []),
     [form.state]
   );
 
   const resetLocationFields = () =>
-    setForm((f) => ({
-      ...f,
-      postOffice: "",
-      block: "",
-      district: "",
-      state: "",
-    }));
+    setForm((f) => ({ ...f, postOffice: "", block: "", district: "", state: "" }));
 
   const lookupPincode = async (pin: string) => {
     setPinStatus("loading");
@@ -186,7 +192,6 @@ const Contact: React.FC = () => {
       setPostOffices(offices);
       setPinStatus("success");
 
-      // Auto-select if only one post office matches this PIN code
       if (offices.length === 1) {
         const po = offices[0];
         setForm((f) => ({
@@ -235,7 +240,6 @@ const Contact: React.FC = () => {
       return;
     }
 
-    // Manual-mode cascading
     if (name === "state") {
       setForm((f) => ({ ...f, state: value, district: "", block: "" }));
       return;
@@ -248,40 +252,55 @@ const Contact: React.FC = () => {
     setForm((f) => ({ ...f, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitError(null);
+    setSubmitting(true);
+
+    try {
+      await submitContactForm(form);
+      setSubmitted(true);
+    } catch (err: any) {
+      setSubmitError(err.message || "Form submit nahi ho paya. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const resetForm = () => {
     setSubmitted(false);
+    setSubmitError(null);
     setPinStatus("idle");
     setPostOffices([]);
-    setForm({
-      name: "",
-      parentName: "",
-      address: "",
-      village: "",
-      pincode: "",
-      postOffice: "",
-      block: "",
-      district: "",
-      state: "",
-      education: "",
-      occupation: "",
-      phone: "",
-      email: "",
-    });
+    setForm(EMPTY_FORM);
   };
 
-  /* ───────── shared styles (Figma look) ───────── */
   const inputClass =
-    "w-full rounded border border-slate-200 bg-white px-3.5 py-3 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0B2545] focus:ring-1 focus:ring-[#0B2545]/20 disabled:cursor-not-allowed disabled:bg-white disabled:text-slate-500";
-  const labelClass = "mb-1.5 block text-[10px] font-bold";
+    "w-full rounded border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0B2545] focus:ring-1 focus:ring-[#0B2545]/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+  const labelClass = "mb-1 block text-[10px] font-bold";
 
   const Req = () => <span style={{ color: RUST }}> *</span>;
 
-  // NOTE: plain render function (not a component) so inputs keep focus while typing
+  const Section: React.FC<{
+    num: number;
+    title: string;
+    action?: React.ReactNode;
+  }> = ({ num, title, action }) => (
+    <div className="flex items-center gap-2.5 pt-1">
+      <span
+        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white"
+        style={{ backgroundColor: NAVY }}
+      >
+        {num}
+      </span>
+      <h4 className="shrink-0 text-xs font-bold" style={{ color: NAVY }}>
+        {title}
+      </h4>
+      <span className="h-px flex-1 bg-slate-200" />
+      {action}
+    </div>
+  );
+
   const renderField = (p: {
     label: string;
     name: string;
@@ -290,8 +309,10 @@ const Contact: React.FC = () => {
     placeholder?: string;
     disabled?: boolean;
     value?: string;
+    inputMode?: "numeric";
+    maxLength?: number;
   }) => (
-    <div key={p.name}>
+    <div key={p.name} className="min-w-0">
       <label className={labelClass} style={{ color: NAVY }}>
         {p.label}
         {p.required && <Req />}
@@ -302,11 +323,30 @@ const Contact: React.FC = () => {
         required={p.required}
         placeholder={p.placeholder}
         disabled={p.disabled}
+        inputMode={p.inputMode}
+        maxLength={p.maxLength}
         value={p.value !== undefined ? p.value : (form as any)[p.name]}
         onChange={handleChange}
         className={inputClass}
       />
     </div>
+  );
+
+  const manualToggle = (
+    <button
+      type="button"
+      onClick={() => {
+        setManualMode((m) => !m);
+        resetLocationFields();
+        setForm((f) => ({ ...f, pincode: "" }));
+        setPinStatus("idle");
+        setPostOffices([]);
+      }}
+      className="shrink-0 text-[10px] font-semibold hover:underline"
+      style={{ color: RUST }}
+    >
+      {manualMode ? L.manualToggleOff : L.manualToggleOn}
+    </button>
   );
 
   return (
@@ -315,68 +355,67 @@ const Contact: React.FC = () => {
 
       {/* ================= HERO ================= */}
       <section className="bg-[#F1F5F9]">
-        <div className={`${container} py-12 sm:py-14`}>
+        <div className={`${container} py-10 sm:py-12`}>
           <p className="text-[11px] font-semibold" style={{ color: RUST }}>
             {t.contact.badge}
           </p>
           <h1
-            className="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl"
+            className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl"
             style={{ color: NAVY }}
           >
             {t.contact.title}
           </h1>
-          <p className="mt-5 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-[13px]">
+          <p className="mt-4 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-[13px]">
             {t.contact.desc}
           </p>
         </div>
       </section>
 
       {/* ================= OFFICE INFO + FORM ================= */}
-      <section className={`${container} py-8 sm:py-10`}>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-6">
-          {/* ---------- LEFT: logo, office info & documents ---------- */}
-          <div>
-            {/* logo + name + tagline */}
-            <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_2px_14px_rgba(11,37,69,0.12)]">
-                <img
-                  src="/Karmbhumi.jpeg"
-                  alt="कर्मभूमि लोगो"
-                  className="h-full w-full rounded-full object-contain"
-                />
+      <section className="bg-[#F1F5F9]/60">
+        <div className={`${container} py-8 sm:py-10`}>
+          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-10">
+            {/* ---------- LEFT ---------- */}
+            <div className="max-w-md">
+              <div className="flex items-center gap-1.5">
+                <PinIcon />
+                <p className="text-[10px] font-semibold" style={{ color: RUST }}>
+                  {t.contact.officeBadge}
+                </p>
               </div>
-              <div>
+
+              <div className="mt-3 flex items-center gap-3">
+                <div className="flex h-25 w-25 shrink-0 items-center justify-center overflow-hidden ">
+                  <img
+                    src="/img/newlogo.png"
+                    alt="कर्मभूमि लोगो"
+                    className="h-full w-full rounded-full object-contain"
+                  />
+                </div>
                 <h2 className="text-xl font-bold sm:text-2xl" style={{ color: NAVY }}>
                   {t.nav.companyName}
                 </h2>
-                <p className="mt-1 text-[11px] font-semibold text-slate-600 sm:text-xs">
-                  {t.nav.tagline}
-                </p>
-              </div>
-            </div>
-
-            {/* office / CIN / website */}
-            <div className="mt-6 max-w-md space-y-4 border-t border-slate-200 pt-5">
-              <div>
-                <div className="flex items-center gap-2">
-                  <PinIcon />
-                  <p className="text-[10px] font-semibold" style={{ color: RUST }}>
-                    {t.contact.officeBadge}
-                  </p>
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-slate-600">
-                  {t.footer.officeAddress}
-                </p>
               </div>
 
-              <div>
-                <p className="text-[10px] font-semibold" style={{ color: RUST }}>
-                  {t.footer.cinLabel}
-                </p>
-                <p className="mt-1 text-xs text-slate-600">U70102UP2012PLC053219</p>
+              <p className="mt-3 text-xs leading-relaxed text-slate-600">
+                {t.footer.officeAddress}
+              </p>
+              <p className="mt-2 text-[10px] text-slate-500">
+                {t.footer.cinLabel}: U70102UP2012PLC053219
+              </p>
+
+              <div className="mt-5 bg-[#E6EDF4] px-5 py-5">
+                <h3 className="text-sm font-bold sm:text-[15px]" style={{ color: NAVY }}>
+                  {t.contact.checklistTitle}
+                </h3>
+                <ul className="mt-3 space-y-2 text-xs text-slate-600">
+                  {DOCS.map((doc, idx) => (
+                    <li key={idx}>{doc}</li>
+                  ))}
+                </ul>
               </div>
 
-              <div>
+              <div className="mt-5">
                 <p className="text-[10px] font-semibold" style={{ color: RUST }}>
                   {L.website}
                 </p>
@@ -384,231 +423,257 @@ const Contact: React.FC = () => {
               </div>
             </div>
 
-            {/* documents checklist */}
-            <div className="mt-6 max-w-md bg-[#E6EDF4] px-5 py-5">
-              <p className="text-[10px] font-semibold" style={{ color: RUST }}>
-                {t.contact.checklistBadge}
-              </p>
-              <h3 className="mt-2 text-sm font-bold sm:text-[15px]" style={{ color: NAVY }}>
-                {t.contact.checklistTitle}
+            {/* ---------- RIGHT: form ---------- */}
+            <div className="rounded border border-slate-100 bg-white p-5 shadow-[0_2px_14px_rgba(11,37,69,0.08)] sm:p-6">
+              <h3 className="text-base font-bold sm:text-lg" style={{ color: NAVY }}>
+                {L.formTitle}
               </h3>
-              <ul className="mt-3 space-y-2.5 text-xs text-slate-600">
-                {DOCS.map((doc, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5">
-                    <span
-                      className="mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white text-[9px] font-bold"
-                      style={{ color: RUST }}
-                    >
-                      ✓
-                    </span>
-                    <span>{doc}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+              <p className="mt-1 text-[11px] text-slate-500">{L.formDesc}</p>
 
-          {/* ---------- RIGHT: form ---------- */}
-          <div className="rounded border border-slate-100 bg-white p-5 shadow-[0_2px_14px_rgba(11,37,69,0.08)] sm:p-6">
-            <h3 className="text-base font-bold sm:text-lg" style={{ color: NAVY }}>
-              {L.formTitle}
-            </h3>
-            <p className="mt-2 text-[11px] text-slate-500 sm:text-xs">{L.formDesc}</p>
-
-            {submitted ? (
-              <div className="mt-6 bg-[#E6EDF4] p-6 text-center">
-                <div
-                  className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold text-white"
-                  style={{ backgroundColor: RUST }}
-                >
-                  ✓
+              {submitted ? (
+                <div className="mt-6 bg-[#E6EDF4] p-6 text-center">
+                  <div
+                    className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold text-white"
+                    style={{ backgroundColor: RUST }}
+                  >
+                    ✓
+                  </div>
+                  <h4 className="text-base font-bold" style={{ color: NAVY }}>
+                    {t.contact.successTitle}
+                  </h4>
+                  <p className="mt-2 text-xs text-slate-600">{t.contact.successDesc}</p>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="mt-5 rounded-md px-5 py-2.5 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
+                    style={{ backgroundColor: RUST }}
+                  >
+                    {t.contact.btnNewMessage}
+                  </button>
                 </div>
-                <h4 className="text-base font-bold" style={{ color: NAVY }}>
-                  {t.contact.successTitle}
-                </h4>
-                <p className="mt-2 text-xs text-slate-600">{t.contact.successDesc}</p>
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="mt-5 rounded-md px-5 py-2.5 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
-                  style={{ backgroundColor: RUST }}
-                >
-                  {t.contact.btnNewMessage}
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-                {renderField({ label: L.name, name: "name", required: true, placeholder: L.phName })}
-                {renderField({ label: L.parentName, name: "parentName", required: true, placeholder: L.phParent })}
-                {renderField({ label: L.village, name: "village", required: true })}
-                {renderField({ label: L.address, name: "address", required: true })}
+              ) : (
+                <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+                  {/* Honeypot - bots fill this, humans don't */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={form.website}
+                    onChange={handleChange}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    style={{
+                      position: "absolute",
+                      left: "-9999px",
+                      opacity: 0,
+                      height: 0,
+                      width: 0,
+                    }}
+                    aria-hidden="true"
+                  />
 
-                {/* Toggle between PIN-code auto-fill and manual entry */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setManualMode((m) => !m);
-                    resetLocationFields();
-                    setForm((f) => ({ ...f, pincode: "" }));
-                    setPinStatus("idle");
-                    setPostOffices([]);
-                  }}
-                  className="block text-[10px] font-semibold hover:underline"
-                  style={{ color: RUST }}
-                >
-                  {manualMode ? L.manualToggleOff : L.manualToggleOn}
-                </button>
+                  {/* ---- 1. Personal details ---- */}
+                  <Section num={1} title={L.secPersonal} />
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {renderField({
+                      label: L.name,
+                      name: "name",
+                      required: true,
+                      placeholder: L.phName,
+                    })}
+                    {renderField({
+                      label: L.parentName,
+                      name: "fatherName",
+                      required: true,
+                      placeholder: L.phParent,
+                    })}
+                    {renderField({
+                      label: L.phone,
+                      name: "phone",
+                      required: true,
+                      type: "tel",
+                      placeholder: "+91 98765 43210",
+                    })}
+                    {renderField({
+                      label: L.email,
+                      name: "email",
+                      type: "email",
+                      placeholder: "name@example.com",
+                    })}
+                  </div>
 
-                {!manualMode ? (
-                  <>
-                    {/* PIN-code driven auto-fill (India Post Pincode API — free, public) */}
-                    <div>
-                      <label className={labelClass} style={{ color: NAVY }}>
-                        {L.pincode}
-                        <Req />
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        name="pincode"
-                        required
-                        maxLength={6}
-                        placeholder="e.g. 282001"
-                        value={form.pincode}
-                        onChange={handleChange}
-                        className={inputClass}
-                      />
-                      <p className="mt-2 text-xs text-slate-600">{L.pincodeHelp}</p>
+                  {/* ---- 2. Address ---- */}
+                  <Section num={2} title={L.secAddress} action={manualToggle} />
+
+                  {!manualMode ? (
+                    <>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {renderField({
+                          label: L.pincode,
+                          name: "pincode",
+                          required: true,
+                          placeholder: "e.g. 282001",
+                          inputMode: "numeric",
+                          maxLength: 6,
+                        })}
+                        {renderField({
+                          label: L.village,
+                          name: "village",
+                          required: true,
+                        })}
+                      </div>
+
+                      <p className="-mt-1 text-[10px] text-slate-500">{L.pincodeHelp}</p>
                       {pinStatus === "loading" && (
-                        <p className="mt-1 text-[11px] font-semibold" style={{ color: NAVY }}>
+                        <p className="text-[11px] font-semibold" style={{ color: NAVY }}>
                           {L.pincodeLoading}
                         </p>
                       )}
                       {pinStatus === "error" && (
-                        <p className="mt-1 text-[11px] font-semibold text-red-600">{L.pincodeError}</p>
+                        <p className="text-[11px] font-semibold text-red-600">{L.pincodeError}</p>
                       )}
-                    </div>
 
-                    {postOffices.length > 0 && (
-                      <div>
-                        <label className={labelClass} style={{ color: NAVY }}>
-                          {L.postOffice}
-                          <Req />
-                        </label>
-                        <select
-                          name="postOffice"
-                          required
-                          value={form.postOffice}
-                          onChange={handleChange}
-                          className={inputClass}
-                        >
-                          <option value="">{L.selectPostOffice}</option>
-                          {postOffices.map((po) => (
-                            <option key={po.Name} value={po.Name}>
-                              {po.Name}
-                            </option>
-                          ))}
-                        </select>
+                      {postOffices.length > 1 && (
+                        <div>
+                          <label className={labelClass} style={{ color: NAVY }}>
+                            {L.postOffice}
+                            <Req />
+                          </label>
+                          <select
+                            name="postOffice"
+                            required
+                            value={form.postOffice}
+                            onChange={handleChange}
+                            className={inputClass}
+                          >
+                            <option value="">{L.selectPostOffice}</option>
+                            {postOffices.map((po) => (
+                              <option key={po.Name} value={po.Name}>
+                                {po.Name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        {renderField({
+                          label: L.state,
+                          name: "state",
+                          disabled: true,
+                          placeholder: L.autoFilled,
+                          value: form.state,
+                        })}
+                        {renderField({
+                          label: L.district,
+                          name: "district",
+                          disabled: true,
+                          placeholder: L.autoFilled,
+                          value: form.district,
+                        })}
+                        {renderField({
+                          label: L.block,
+                          name: "block",
+                          disabled: true,
+                          placeholder: L.autoFilled,
+                          value: form.block,
+                        })}
                       </div>
-                    )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {renderField({
+                          label: L.village,
+                          name: "village",
+                          required: true,
+                        })}
+                        <div className="min-w-0">
+                          <label className={labelClass} style={{ color: NAVY }}>
+                            {L.state}
+                            <Req />
+                          </label>
+                          <select
+                            name="state"
+                            required
+                            value={form.state}
+                            onChange={handleChange}
+                            className={inputClass}
+                          >
+                            <option value="">{L.selectState}</option>
+                            {INDIAN_STATES.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
 
-                    {renderField({ label: L.state, name: "state", disabled: true, value: form.state })}
-                    {renderField({ label: L.district, name: "district", disabled: true, value: form.district })}
-                    {renderField({ label: L.block, name: "block", disabled: true, value: form.block })}
-                  </>
-                ) : (
-                  <>
-                    {/* Manual fallback: static State -> District list, free-text Block */}
-                    <div>
-                      <label className={labelClass} style={{ color: NAVY }}>
-                        {L.state}
-                        <Req />
-                      </label>
-                      <select
-                        name="state"
-                        required
-                        value={form.state}
-                        onChange={handleChange}
-                        className={inputClass}
-                      >
-                        <option value="">{L.selectState}</option>
-                        {INDIAN_STATES.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="min-w-0">
+                          <label className={labelClass} style={{ color: NAVY }}>
+                            {L.district}
+                            <Req />
+                          </label>
+                          <select
+                            name="district"
+                            required
+                            value={form.district}
+                            onChange={handleChange}
+                            disabled={!form.state}
+                            className={inputClass}
+                          >
+                            <option value="">
+                              {form.state ? L.selectDistrictReady : L.selectDistrict}
+                            </option>
+                            {districtOptions.map((d) => (
+                              <option key={d} value={d}>
+                                {d}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        {renderField({
+                          label: L.block,
+                          name: "block",
+                          required: true,
+                          disabled: !form.district,
+                          placeholder: form.district
+                            ? L.blockPlaceholderReady
+                            : L.blockPlaceholderLocked,
+                        })}
+                      </div>
+                    </>
+                  )}
 
-                    <div>
-                      <label className={labelClass} style={{ color: NAVY }}>
-                        {L.district}
-                        <Req />
-                      </label>
-                      <select
-                        name="district"
-                        required
-                        value={form.district}
-                        onChange={handleChange}
-                        disabled={!form.state}
-                        className={inputClass}
-                      >
-                        <option value="">
-                          {form.state ? L.selectDistrictReady : L.selectDistrict}
-                        </option>
-                        {districtOptions.map((d) => (
-                          <option key={d} value={d}>
-                            {d}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {renderField({ label: L.address, name: "address", required: true })}
 
-                    <div>
-                      <label className={labelClass} style={{ color: NAVY }}>
-                        {L.block}
-                        <Req />
-                      </label>
-                      <input
-                        type="text"
-                        name="block"
-                        required
-                        disabled={!form.district}
-                        placeholder={form.district ? L.blockPlaceholderReady : L.blockPlaceholderLocked}
-                        value={form.block}
-                        onChange={handleChange}
-                        className={inputClass}
-                      />
-                    </div>
-                  </>
-                )}
+                  {/* ---- 3. Background ---- */}
+                  <Section num={3} title={L.secBackground} />
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {renderField({ label: L.education, name: "education", required: true })}
+                    {renderField({ label: L.occupation, name: "occupation", required: true })}
+                  </div>
 
-                {renderField({ label: L.education, name: "education", required: true })}
-                {renderField({ label: L.occupation, name: "occupation", required: true })}
-                {renderField({
-                  label: L.phone,
-                  name: "phone",
-                  required: true,
-                  type: "tel",
-                  placeholder: "+91 98765 43210",
-                })}
-                {renderField({
-                  label: L.email,
-                  name: "email",
-                  type: "email",
-                  placeholder: "name@example.com",
-                })}
+                  {submitError && (
+                    <p className="text-[11px] font-semibold text-red-600">{submitError}</p>
+                  )}
 
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 rounded-md px-5 py-3 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
-                  style={{ backgroundColor: RUST }}
-                >
-                  <span>{L.submit}</span>
-                  <Arrow />
-                </button>
-              </form>
-            )}
+                  <div className="flex items-center justify-between gap-3 pt-1">
+                    <span className="text-[10px] text-slate-500">{L.required}</span>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                      style={{ backgroundColor: RUST }}
+                    >
+                      <span>{submitting ? L.submitting : L.submit}</span>
+                      {!submitting && <Arrow />}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </section>
