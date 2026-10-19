@@ -1,6 +1,6 @@
 // ---------------- API URL ----------------
 const LOCAL_API_URL = "https://karmbhumi-backend.vercel.app/api";
-const PRODUCTION_API_URL = "https://your-backend-url.com/api"; // deploy ke baad apna backend URL yahan daalo
+const PRODUCTION_API_URL = "https://karmbhumi-backend.vercel.app/api"; // deploy ke baad apna backend URL yahan daalo
 
 // Vite dev (npm run dev) me local, build/deploy me production URL use hoga
 export const API_URL: string = import.meta.env.DEV ? LOCAL_API_URL : PRODUCTION_API_URL;
