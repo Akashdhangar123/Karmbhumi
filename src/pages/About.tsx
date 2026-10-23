@@ -37,21 +37,46 @@ const About: React.FC = () => {
 
   const FACTS = hi
     ? [
-        { label: "कंपनी", value: "कर्मभूमि इंडिया लिमिटेड" },
+        { label: "कम्पनी का नाम", value: "कर्मभूमि इंडिया लिमिटेड" },
         { label: "संस्थापक", value: "डॉ. शिव करन कर्मयोद्धा" },
-        { label: "मुख्य गतिविधियां", value: "रियल एस्टेट, उत्पाद एवं सेवाएँ" },
-        { label: "कंपनी का प्रकार", value: "पब्लिक लिमिटेड" },
-        { label: "निगमन", value: "22 अक्टूबर 2012" },
+        { label: "स्थापना वर्ष", value: "18 जून 2006 (निगमन 22 अक्टूबर 2012)" },
+        { label: "कम्पनी का प्रकार", value: "पब्लिक कम्पनी (अंशधारिता से निगमित)" },
+        { label: "कार्यक्षेत्र", value: "सम्पूर्ण भारत (अनुसूचित राज्यों को छोड़कर)" },
+        { label: "मुख्य व्यवसाय", value: "रियल एस्टेट, उत्पाद एवं सेवा उद्योग" },
+        { label: "उद्देश्य", value: "कर्मभूमि बैंक ऑफ इंडिया की स्थापना" },
+        {
+          label: "मुख्य उद्देश्य",
+          value: "बेरोजगारी निर्मूलन, उत्पाद एवं सेवाओं के माध्यम से देश का विकास करना",
+        },
+        { label: "आग्रह", value: "सहभागिता से पूँजी निर्माण, सहकारिता से विस्तार करना" },
         { label: "CIN", value: "U70102UP2012PLC053219" },
       ]
     : [
-        { label: "Company", value: "Karmbhumi India Limited" },
+        { label: "Company Name", value: "Karmbhumi India Limited" },
         { label: "Founder", value: "Dr. Shiv Karan Karmayoddha" },
-        { label: "Core Activities", value: "Real Estate, Products & Services" },
-        { label: "Company Type", value: "Public Limited" },
-        { label: "Incorporation", value: "22 October 2012" },
+        { label: "Year of Establishment", value: "18 June 2006 (Incorporated 22 October 2012)" },
+        { label: "Company Type", value: "Public Company (Incorporated by Shares)" },
+        { label: "Area of Operation", value: "All India (excluding scheduled states)" },
+        { label: "Main Business", value: "Real Estate, Products & Services Industry" },
+        { label: "Objective", value: "Establishment of Karmbhumi Bank of India" },
+        {
+          label: "Main Objective",
+          value: "Eradicating unemployment and developing the nation through products and services",
+        },
+        { label: "Aagrah (Motto)", value: "Capital creation through participation, expansion through cooperation" },
         { label: "CIN", value: "U70102UP2012PLC053219" },
       ];
+
+  // Vision & Mission text taken directly from the company document
+  const VISION_TITLE = hi ? "हमारा कल्पना दर्शन" : "Our Vision";
+  const VISION_DESC = hi
+    ? "अन्तर्राष्ट्रीय स्तर की एक विशाल प्रतिस्पर्धी वित्तीय समूह, जो विभिन्न सभाओं के लिए महत्त्वपूर्ण हो एवं भारत का गौरव हो।"
+    : "A large, internationally competitive financial group that is significant for various forums and is a source of pride for India.";
+
+  const MISSION_TITLE = hi ? "हमारा लक्ष्य" : "Our Mission";
+  const MISSION_DESC = hi
+    ? "आकांक्षाओं के अनुरूप पूँजी नियोजन, उत्पाद एवं सेवाओं के माध्यम से समुचित लाभ के साथ वित्तीय सुरक्षा प्रदान कर सभी के जीवन स्तर को निरापद रखना एवं उन्नति करना तथा आर्थिक विकास के लिए संसाधन सुनिश्चित कर देश का विकास करना।"
+    : "To provide financial security with fair returns through capital planning aligned with aspirations, and through products and services; to keep the standard of living of all safe and to improve it; and to develop the nation by ensuring resources for economic growth.";
 
   const VALUES = hi
     ? [
@@ -74,6 +99,63 @@ const About: React.FC = () => {
   const CULTURE = hi
     ? ["दक्षता", "अनुकूलनशीलता", "सहयोग", "प्रतिबद्धता", "अनुशासन", "सशक्तिकरण", "सहानुभूति", "उत्कृष्टता"]
     : ["Efficiency", "Adaptability", "Collaboration", "Commitment", "Discipline", "Empowerment", "Empathy", "Excellence"];
+
+  const JOURNEY_TITLE = hi ? "हमारी यात्रा" : "Our Journey";
+  const JOURNEY = hi
+    ? [
+        { y: "18 जून 2006", d: "कर्मभूमि की स्थापना, डॉ. शिव करन कर्मयोद्धा के नेतृत्व में, रोज़गार और आर्थिक सशक्तिकरण के संकल्प के साथ।" },
+        { y: "22 अक्टूबर 2012", d: "कर्मभूमि इंडिया लिमिटेड के रूप में पब्लिक कम्पनी का निगमन, CIN: U70102UP2012PLC053219।" },
+        { y: "आज", d: "रियल एस्टेट, उत्पाद एवं सेवा उद्योग में कार्यरत, और कर्मभूमि बैंक ऑफ इंडिया की स्थापना की दिशा में प्रयासरत।" },
+      ]
+    : [
+        { y: "18 June 2006", d: "Karmbhumi is established under Dr. Shiv Karan Karmayoddha with a resolve to create employment and economic empowerment." },
+        { y: "22 October 2012", d: "Incorporated as Karmbhumi India Limited, a public company, CIN: U70102UP2012PLC053219." },
+        { y: "Today", d: "Working in the real estate, products and services industry, and moving toward the establishment of Karmbhumi Bank of India." },
+      ];
+
+  const WHAT_TITLE = hi ? "हम क्या करते हैं" : "What We Do";
+  const WHAT_INTRO = hi
+    ? "कर्मभूमि तीन क्षेत्रों में काम करती है, ताकि लोगों को सुरक्षित निवेश और रोज़गार, दोनों मिल सकें।"
+    : "Karmbhumi works across three areas so that people get both secure investment opportunities and employment.";
+  const WHAT = hi
+    ? [
+        { t: "रियल एस्टेट", d: "भूमि और परिसंपत्ति-आधारित परियोजनाएँ, जो निवेशकों को ठोस और टिकाऊ आधार देती हैं।" },
+        { t: "उत्पाद", d: "आम लोगों की ज़रूरतों से जुड़े उत्पाद, जो व्यवसाय के साथ-साथ रोज़गार के अवसर भी बनाते हैं।" },
+        { t: "सेवाएँ", d: "भरोसेमंद सेवाएँ, जो ग्राहकों और सदस्यों को हर कदम पर सहयोग देती हैं।" },
+      ]
+    : [
+        { t: "Real Estate", d: "Land and asset-based projects that give investors a solid and lasting foundation." },
+        { t: "Products", d: "Products built around everyday needs, creating business and employment opportunities together." },
+        { t: "Services", d: "Dependable services that support customers and members at every step." },
+      ];
+
+  const APPROACH_TITLE = hi ? "हमारा तरीका" : "Our Approach";
+  const APPROACH = hi
+    ? [
+        { t: "सहभागिता से पूँजी निर्माण", d: "जब बहुत से लोग थोड़ा-थोड़ा जुड़ते हैं, तो मिलकर एक मज़बूत पूँजी बनती है।" },
+        { t: "सहकारिता से विस्तार", d: "आपसी सहयोग से कार्यक्षेत्र बढ़ता है और उसका लाभ सभी सदस्यों तक पहुँचता है।" },
+        { t: "रोज़गार से राष्ट्र विकास", d: "बेरोजगारी निर्मूलन हमारा मुख्य उद्देश्य है, क्योंकि रोज़गार से ही देश आगे बढ़ता है।" },
+      ]
+    : [
+        { t: "Capital through participation", d: "When many people contribute a little, together they build a strong pool of capital." },
+        { t: "Expansion through cooperation", d: "Working together widens our reach, and the benefit reaches every member." },
+        { t: "Nation-building through employment", d: "Eradicating unemployment is our main objective, because jobs are what move a country forward." },
+      ];
+
+  const TRUST_TITLE = hi ? "आप हम पर भरोसा क्यों कर सकते हैं" : "Why You Can Trust Us";
+  const TRUST = hi
+    ? [
+        "कम्पनी कॉर्पोरेट कार्य मंत्रालय (MCA) में पंजीकृत है और CIN से सत्यापित की जा सकती है।",
+        "हर निवेश परिसंपत्ति-समर्थित रिटर्न के सिद्धांत पर आधारित है।",
+        "निष्पक्षता, नैतिकता और कानूनी अनुपालन हमारे काम का आधार है।",
+        "हर निवेशक की गरिमा और सुरक्षा हमारी सर्वोच्च प्राथमिकता है।",
+      ]
+    : [
+        "The company is registered with the Ministry of Corporate Affairs (MCA) and can be verified using its CIN.",
+        "Every investment follows the principle of asset-backed returns.",
+        "Fairness, ethics, and legal compliance are the base of our work.",
+        "The dignity and safety of every investor is our highest priority.",
+      ];
 
   return (
     <div className="min-h-screen bg-white text-slate-900 antialiased" style={{ fontFamily: FONT }}>
@@ -152,11 +234,9 @@ const About: React.FC = () => {
                 {hi ? "विज़न" : "Vision"}
               </p>
               <h3 className="mt-2 text-base font-bold" style={{ color: NAVY }}>
-                {t.about.visionTitle}
+                {VISION_TITLE}
               </h3>
-              <p className="mt-2 text-[11px] leading-relaxed text-slate-600">
-                {t.about.visionDesc}
-              </p>
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-600">{VISION_DESC}</p>
             </div>
 
             <div className="rounded-md bg-white p-5 shadow-sm">
@@ -164,13 +244,82 @@ const About: React.FC = () => {
                 {hi ? "मिशन" : "Mission"}
               </p>
               <h3 className="mt-2 text-base font-bold" style={{ color: NAVY }}>
-                {t.about.missionTitle}
+                {MISSION_TITLE}
               </h3>
-              <p className="mt-2 text-[11px] leading-relaxed text-slate-600">
-                {t.about.missionDesc}
-              </p>
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-600">{MISSION_DESC}</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ================= OUR JOURNEY ================= */}
+      <section className={`${container} py-12 sm:py-14`}>
+        <h2 className="text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
+          {JOURNEY_TITLE}
+        </h2>
+        <div className="mt-6 max-w-3xl space-y-6 border-l-2 pl-5" style={{ borderColor: RUST }}>
+          {JOURNEY.map((j) => (
+            <div key={j.y}>
+              <p className="text-xs font-semibold" style={{ color: RUST }}>
+                {j.y}
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{j.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ================= WHAT WE DO ================= */}
+      <section className="bg-[#F1F5F9]">
+        <div className={`${container} py-12 sm:py-14`}>
+          <h2 className="text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
+            {WHAT_TITLE}
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">{WHAT_INTRO}</p>
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            {WHAT.map((w) => (
+              <div key={w.t} className="rounded-md bg-white p-5 shadow-sm">
+                <h3 className="text-base font-bold" style={{ color: NAVY }}>
+                  {w.t}
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-slate-600">{w.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ================= OUR APPROACH ================= */}
+      <section className={`${container} py-12 sm:py-14`}>
+        <h2 className="text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
+          {APPROACH_TITLE}
+        </h2>
+        <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 md:grid-cols-3">
+          {APPROACH.map((a) => (
+            <div key={a.t} className="border-t-2 pt-4" style={{ borderColor: NAVY }}>
+              <h3 className="text-sm font-bold sm:text-[15px]" style={{ color: NAVY }}>
+                {a.t}
+              </h3>
+              <p className="mt-2 text-xs leading-relaxed text-slate-600">{a.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ================= WHY TRUST US ================= */}
+      <section className="bg-[#F1F5F9]">
+        <div className={`${container} py-12 sm:py-14`}>
+          <h2 className="text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
+            {TRUST_TITLE}
+          </h2>
+          <ul className="mt-5 max-w-3xl space-y-3">
+            {TRUST.map((x) => (
+              <li key={x} className="flex gap-3 text-sm leading-relaxed text-slate-600">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: RUST }} />
+                <span>{x}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -246,4 +395,4 @@ const About: React.FC = () => {
   );
 };
 
-export default About; 
+export default About;
