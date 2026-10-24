@@ -5,7 +5,6 @@ import Footer from "./Footer";
 import { useLanguage } from "../context/LanguageContext";
 
 // ================= IMAGE ASSETS =================
-const FOUNDER_SPEECH_IMG = "/img/founder-speech.jpg"; // Hero card photo
 const DIRECTOR_PHOTO_SRC = "/img/dr.jpg"; // Founder message photo
 
 const FONT = "'Manrope', 'Noto Sans Devanagari', 'Segoe UI', Arial, sans-serif";
@@ -20,7 +19,6 @@ const Arrow: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
 );
 
 const Home: React.FC = () => {
-  const [speechImgError, setSpeechImgError] = useState(false);
   const [founderImgError, setFounderImgError] = useState(false);
 
   const { t, lang } = useLanguage();
@@ -136,10 +134,10 @@ const Home: React.FC = () => {
           }}
         />
 
-       {/* Hero: centered letterhead-style design */}
+        {/* Hero: centered letterhead-style design */}
         <div className="relative" style={{ backgroundColor: "#ECEBEA" }}>
           <div className={`${container} relative py-10 lg:py-14`}>
-            {/* Top: small logo + company details (left aligned like the letterhead) */}
+            {/* Top: company details (left aligned like the letterhead) */}
             {/* <div className="flex items-start gap-3 sm:gap-4">
               <div className="leading-snug">
                 <p className="text-base font-bold sm:text-xl" style={{ color: "#E5231B" }}>
@@ -167,7 +165,6 @@ const Home: React.FC = () => {
                 {t.home.title1} {t.home.title2}
               </h1>
 
-              {/* Center big logo */}
               {/* Center big logo */}
               <div className="mt-8 flex h-[400px] w-[400px] items-center justify-center sm:h-[480px] sm:w-[480px] lg:mt-10 lg:h-[520px] lg:w-[520px]">
                 <img
