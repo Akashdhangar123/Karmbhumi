@@ -23,14 +23,35 @@ const STATUS_READ = "read";
 const REQUEST_TIMEOUT_MS = 15000;
 
 /* ------------------------------------------------------------------ */
+/* Posts (pad) - Contact.tsx, validator aur DB CHECK se match honi chahiye */
+/* ------------------------------------------------------------------ */
+
+export const POST_LABELS: Record<string, string> = {
+  BOARD_OF_DIRECTOR: "Board of Director",
+  CEO: "CEO",
+  HRM: "HRM",
+  ZO: "ZO",
+  GCM: "GCM",
+  DVM: "DVM",
+  DBM: "DBM",
+  SBM: "SBM",
+  BO: "BO",
+  ADVISOR: "Advisor",
+  MEMBER: "Member",
+};
+
+/** DB wali id (jaise "BOARD_OF_DIRECTOR") ko dikhne wale naam me badalta hai */
+export const postLabel = (id: string) => POST_LABELS[id] || id || "-";
+
+/* ------------------------------------------------------------------ */
 /* Types                                                              */
 /* ------------------------------------------------------------------ */
 
-// Contact.tsx ke form state se match karta hai
+// Contact.tsx (registration form) ke form state se match karta hai
 export interface ContactFormData {
+  appliedPost: string;
   name: string;
   fatherName: string;
-  motherName?: string;
   address: string;
   village: string;
   pincode: string;
@@ -40,16 +61,17 @@ export interface ContactFormData {
   state: string;
   education: string;
   occupation: string;
+  experience?: string;
   phone: string;
   email?: string;
   website?: string; // honeypot
 }
 
-// Backend ke contact_messages table jaisa payload
+// Backend validator (contact.validator.js) ke body fields jaisa payload
 interface ContactPayload {
-  full_name: string;
-  father_name: string;
-  mother_name?: string;
+  appliedPost: string;
+  name: string;
+  fatherName: string;
   village: string;
   address: string;
   pincode: string;
@@ -58,7 +80,8 @@ interface ContactPayload {
   block: string;
   education: string;
   occupation: string;
-  contact_number: string;
+  experience?: string;
+  phone: string;
   email?: string;
   website: string; // honeypot (backend isse check karta hai)
 }
@@ -68,6 +91,7 @@ export interface ContactSuccessResponse {
   message: string;
   data?: {
     id: string;
+    applied_post: string;
     full_name: string;
     status: string;
     created_at: string;
@@ -101,8 +125,9 @@ const trim = (v?: string) => (typeof v === "string" ? v.trim() : "");
 /** Frontend form -> backend payload (empty optional fields hata deta hai) */
 const toPayload = (form: ContactFormData): ContactPayload => {
   const payload: ContactPayload = {
-    full_name: trim(form.name),
-    father_name: trim(form.fatherName),
+    appliedPost: trim(form.appliedPost),
+    name: trim(form.name),
+    fatherName: trim(form.fatherName),
     village: trim(form.village),
     address: trim(form.address),
     pincode: trim(form.pincode),
@@ -112,12 +137,12 @@ const toPayload = (form: ContactFormData): ContactPayload => {
     block: trim(form.block) || "NA",
     education: trim(form.education),
     occupation: trim(form.occupation),
-    contact_number: trim(form.phone),
+    phone: trim(form.phone),
     website: form.website || "",
   };
 
-  const mother = trim(form.motherName);
-  if (mother) payload.mother_name = mother;
+  const experience = trim(form.experience);
+  if (experience) payload.experience = experience;
 
   const email = trim(form.email);
   if (email) payload.email = email;
@@ -139,7 +164,7 @@ const buildErrorMessage = (status: number, body: any): string => {
 };
 
 /* ------------------------------------------------------------------ */
-/* API: public contact form                                           */
+/* API: public registration form                                      */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -196,9 +221,11 @@ export const submitContactForm = async (
 /** CPanel table / popup me dikhne wala record */
 export interface ContactRecord {
   id: string;
+  appliedPost: string; // DB id, jaise "CEO" / "BOARD_OF_DIRECTOR"
+  appliedPostLabel: string; // dikhne wala naam, jaise "Board of Director"
   name: string;
   fatherName: string;
-  motherName: string;
+  motherName: string; // ab form me nahi hai, CPanel purana code na toote isliye "" aata hai
   village: string;
   address: string;
   pincode: string;
@@ -207,6 +234,7 @@ export interface ContactRecord {
   block: string;
   education: string;
   occupation: string;
+  experience: string;
   phone: string;
   email: string;
   is_read: boolean;
@@ -226,6 +254,8 @@ const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 /** Backend ki raw row (full_name, father_name, ...) -> ContactRecord */
 const normalizeContact = (r: any): ContactRecord => ({
   id: String(r.id),
+  appliedPost: str(r.applied_post),
+  appliedPostLabel: postLabel(str(r.applied_post)),
   name: str(r.full_name) || str(r.name),
   fatherName: str(r.father_name),
   motherName: str(r.mother_name),
@@ -237,6 +267,7 @@ const normalizeContact = (r: any): ContactRecord => ({
   block: str(r.block),
   education: str(r.education),
   occupation: str(r.occupation),
+  experience: str(r.experience),
   phone: str(r.contact_number) || str(r.phone),
   email: str(r.email),
   is_read: str(r.status).toLowerCase() !== STATUS_NEW,
@@ -285,15 +316,17 @@ async function authFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
 }
 
-/** GET /api/contact?page=&limit=&search=&status=new */
+/** GET /api/contact?page=&limit=&search=&status=new&post=CEO */
 export const fetchContacts = async (opts: {
   page: number;
   q?: string;
   unreadOnly?: boolean;
+  post?: string; // pad ke hisab se filter (jaise "CEO")
 }): Promise<ContactListResult> => {
   const params = new URLSearchParams({ page: String(opts.page), limit: "20" });
   if (opts.q) params.set("search", opts.q);
   if (opts.unreadOnly) params.set("status", STATUS_NEW);
+  if (opts.post) params.set("post", opts.post);
 
   const res = await authFetch<{
     data: any[];

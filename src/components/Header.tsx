@@ -28,15 +28,15 @@ const Header: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   async function handleLogout() {
-  setOpen(false);
-  // Pehle home pe jao, taaki protected route user null hote hi kahin aur redirect na kare
-  navigate("/", { replace: true });
-  try {
-    await logout();
-  } catch (err) {
-    console.error("logout failed:", err);
+    setOpen(false);
+    // Pehle home pe jao, taaki protected route user null hote hi kahin aur redirect na kare
+    navigate("/", { replace: true });
+    try {
+      await logout();
+    } catch (err) {
+      console.error("logout failed:", err);
+    }
   }
-}
 
   const LangPill = () => (
     <button
@@ -49,7 +49,7 @@ const Header: React.FC = () => {
         className={`px-2 py-1 ${hi ? "text-white" : "text-slate-500"}`}
         style={hi ? { backgroundColor: NAVY } : undefined}
       >
-       EN
+        EN
       </span>
       <span
         className={`px-2 py-1 ${!hi ? "text-white" : "text-slate-500"}`}
@@ -77,19 +77,26 @@ const Header: React.FC = () => {
       {/* Main bar */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-5 sm:px-8">
-          {/* Logo */}
+          {/* Logo: Karmbhumi -> Logo -> India Limited */}
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="h-19 w-19 shrink-0 overflow-hidden ">
-              <img src="/img/newlogo.png" alt="कर्मभूमि लोगो" className="h-full w-full object-contain" />
+            {/* 1. Karmbhumi */}
+            <p className="text-lg lg:text-2xl font-bold tracking-tight" style={{ color: NAVY }}>
+              {hi ? "कर्मभूमि" : "Karmbhumi"}
+            </p>
+
+            {/* 2. Logo */}
+            <div className="h-20 w-20 shrink-0 overflow-hidden">
+              <img
+                src="/img/newlogo.png"
+                alt="कर्मभूमि लोगो"
+                className="h-full w-full object-contain"
+              />
             </div>
-            <div className="leading-tight">
-              <p className="text-lg font-bold tracking-tight" style={{ color: NAVY }}>
-                {hi ? "कर्मभूमि" : "Karmbhumi"}
-              </p>
-              <p className="text-[8px] font-semibold uppercase tracking-wider text-slate-500">
-                {hi ? "इंडिया लिमिटेड" : "India Limited"}
-              </p>
-            </div>
+
+            {/* 3. India Limited */}
+            <p className="text-lg  lg:text-2xl font-bold tracking-tight" style={{ color: NAVY }}>
+              {hi ? "इंडिया लिमिटेड" : "India Limited"}
+            </p>
           </Link>
 
           {/* Desktop nav */}

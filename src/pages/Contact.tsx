@@ -12,6 +12,21 @@ const RUST = "#B84A12";
 // Free, public, no-key-required India Post Pincode API
 const PINCODE_API = "https://api.postalpincode.in/pincode/";
 
+// Pad (Post) list - order same as handwritten note. id backend/DB se match hona chahiye.
+const POSTS: { id: string; en: string; hi: string }[] = [
+  { id: "BOARD_OF_DIRECTOR", en: "Board of Director", hi: "बोर्ड ऑफ डायरेक्टर" },
+  { id: "CEO", en: "CEO", hi: "CEO" },
+  { id: "HRM", en: "HRM", hi: "HRM" },
+  { id: "ZO", en: "ZO", hi: "ZO" },
+  { id: "GCM", en: "GCM", hi: "GCM" },
+  { id: "DVM", en: "DVM", hi: "DVM" },
+  { id: "DBM", en: "DBM", hi: "DBM" },
+  { id: "SBM", en: "SBM", hi: "SBM" },
+  { id: "BO", en: "BO", hi: "BO" },
+  { id: "ADVISOR", en: "Advisor", hi: "सलाहकार (Advisor)" },
+  { id: "MEMBER", en: "Member", hi: "सदस्य (Member)" },
+];
+
 interface PostOfficeResult {
   Name: string;
   Block: string;
@@ -35,9 +50,9 @@ const PinIcon: React.FC = () => (
 );
 
 const EMPTY_FORM = {
+  appliedPost: "",
   name: "",
   fatherName: "",
-  motherName: "",
   address: "",
   village: "",
   pincode: "",
@@ -47,6 +62,7 @@ const EMPTY_FORM = {
   state: "",
   education: "",
   occupation: "",
+  experience: "",
   phone: "",
   email: "",
   website: "", // honeypot
@@ -68,13 +84,22 @@ const Contact: React.FC = () => {
 
   const L = hi
     ? {
-        formTitle: "संपर्क फॉर्म",
+        badge: "ऑनलाइन पंजीकरण",
+        heroTitle: "ऑनलाइन पंजीकरण फॉर्म",
+        heroDesc:
+          "सबसे पहले अपना पद चुनें, उसके बाद फॉर्म में अपना पूरा विवरण सही-सही भरें।",
+        formTitle: "पंजीकरण फॉर्म",
         formDesc: "कृपया अपना पूरा विवरण सही-सही भरें।",
+        secPost: "पद चयन",
+        postHelp: "पहले वह पद चुनें जिसके लिए आप पंजीकरण करना चाहते हैं",
+        selectedPost: "चयनित पद",
+        changePost: "बदलें",
+        postFirst: "कृपया पहले पद चुनें",
         secPersonal: "व्यक्तिगत विवरण",
         secAddress: "पता",
-        secBackground: "पृष्ठभूमि",
-        name: "पूरा नाम",
-        parentName: "पिता / माता का नाम",
+        secBackground: "शिक्षा एवं अनुभव",
+        name: "नाम",
+        parentName: "पिता का नाम",
         address: "पूरा पता",
         village: "गाँव",
         pincode: "पिन कोड",
@@ -92,11 +117,13 @@ const Contact: React.FC = () => {
         selectDistrictReady: "जिला चुनें",
         blockPlaceholderLocked: "पहले जिला चुनें",
         blockPlaceholderReady: "ब्लॉक / तहसील लिखें",
-        education: "शिक्षा",
+        education: "शैक्षिक योग्यता",
         occupation: "व्यवसाय",
-        phone: "संपर्क नंबर",
+        experience: "अनुभव (वैकल्पिक)",
+        phExperience: "अपना कार्य अनुभव संक्षेप में लिखें",
+        phone: "मोबाइल नंबर",
         email: "ईमेल आईडी",
-        submit: "फॉर्म जमा करें",
+        submit: "पंजीकरण जमा करें",
         submitting: "जमा हो रहा है...",
         required: "* आवश्यक फ़ील्ड",
         manualToggleOn: "पिन कोड नहीं मिल रहा? यहां स्वयं भरें",
@@ -104,16 +131,28 @@ const Contact: React.FC = () => {
         phName: "उदा. राहुल वर्मा",
         phParent: "उदा. सुरेश वर्मा",
         website: "आधिकारिक वेबसाइट",
+        successTitle: "पंजीकरण सफल रहा",
+        successDesc: "आपका पंजीकरण प्राप्त हो गया है। हमारी टीम जल्द ही आपसे संपर्क करेगी।",
+        btnNew: "नया पंजीकरण करें",
       }
     : {
-        formTitle: "Contact Form",
+        badge: "Online Registration",
+        heroTitle: "Online Registration Form",
+        heroDesc:
+          "First select your post, then fill in your complete details in the form accurately.",
+        formTitle: "Registration Form",
         formDesc: "Please fill in all your details accurately.",
+        secPost: "Select Post",
+        postHelp: "First choose the post you want to register for",
+        selectedPost: "Selected post",
+        changePost: "Change",
+        postFirst: "Please select a post first",
         secPersonal: "Personal details",
         secAddress: "Address",
-        secBackground: "Background",
-        name: "Full Name",
-        parentName: "Father's Name / Mother's Name",
-        address: "Address",
+        secBackground: "Education & experience",
+        name: "Name",
+        parentName: "Father's Name",
+        address: "Full Address",
         village: "Village",
         pincode: "PIN Code",
         pincodeHelp: "Enter 6-digit PIN code — State, District & Block fill in automatically",
@@ -130,11 +169,13 @@ const Contact: React.FC = () => {
         selectDistrictReady: "Select District",
         blockPlaceholderLocked: "Select district first",
         blockPlaceholderReady: "Enter Block / Tehsil",
-        education: "Education",
+        education: "Educational Qualification",
         occupation: "Occupation",
-        phone: "Contact No.",
+        experience: "Experience (optional)",
+        phExperience: "Briefly describe your work experience",
+        phone: "Mobile No.",
         email: "Email ID",
-        submit: "Submit Form",
+        submit: "Submit Registration",
         submitting: "Submitting...",
         required: "* Required fields",
         manualToggleOn: "Can't find your PIN code? Fill address manually",
@@ -142,6 +183,9 @@ const Contact: React.FC = () => {
         phName: "e.g. Rahul Verma",
         phParent: "e.g. Suresh Verma",
         website: "Official Website",
+        successTitle: "Registration successful",
+        successDesc: "Your registration has been received. Our team will contact you soon.",
+        btnNew: "Register another person",
       };
 
   const DOCS = hi
@@ -159,6 +203,8 @@ const Contact: React.FC = () => {
         "2 Recent Passport Size Photographs",
         "₹250 Registration Fee (Non-Refundable)",
       ];
+
+  const selectedPost = POSTS.find((p) => p.id === form.appliedPost) || null;
 
   const districtOptions = useMemo(
     () => (form.state ? STATE_DISTRICTS[form.state] || [] : []),
@@ -228,6 +274,12 @@ const Contact: React.FC = () => {
       return;
     }
 
+    if (name === "phone") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+      setForm((f) => ({ ...f, phone: digitsOnly }));
+      return;
+    }
+
     if (name === "postOffice") {
       const po = postOffices.find((p) => p.Name === value);
       setForm((f) => ({
@@ -255,8 +307,13 @@ const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
-    setSubmitting(true);
 
+    if (!form.appliedPost) {
+      setSubmitError(L.postFirst);
+      return;
+    }
+
+    setSubmitting(true);
     try {
       await submitContactForm(form);
       setSubmitted(true);
@@ -272,6 +329,7 @@ const Contact: React.FC = () => {
     setSubmitError(null);
     setPinStatus("idle");
     setPostOffices([]);
+    setManualMode(false);
     setForm(EMPTY_FORM);
   };
 
@@ -311,24 +369,38 @@ const Contact: React.FC = () => {
     value?: string;
     inputMode?: "numeric";
     maxLength?: number;
+    textarea?: boolean;
   }) => (
     <div key={p.name} className="min-w-0">
       <label className={labelClass} style={{ color: NAVY }}>
         {p.label}
         {p.required && <Req />}
       </label>
-      <input
-        type={p.type || "text"}
-        name={p.name}
-        required={p.required}
-        placeholder={p.placeholder}
-        disabled={p.disabled}
-        inputMode={p.inputMode}
-        maxLength={p.maxLength}
-        value={p.value !== undefined ? p.value : (form as any)[p.name]}
-        onChange={handleChange}
-        className={inputClass}
-      />
+      {p.textarea ? (
+        <textarea
+          name={p.name}
+          required={p.required}
+          placeholder={p.placeholder}
+          maxLength={p.maxLength}
+          rows={3}
+          value={p.value !== undefined ? p.value : (form as any)[p.name]}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      ) : (
+        <input
+          type={p.type || "text"}
+          name={p.name}
+          required={p.required}
+          placeholder={p.placeholder}
+          disabled={p.disabled}
+          inputMode={p.inputMode}
+          maxLength={p.maxLength}
+          value={p.value !== undefined ? p.value : (form as any)[p.name]}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      )}
     </div>
   );
 
@@ -357,16 +429,16 @@ const Contact: React.FC = () => {
       <section className="bg-[#F1F5F9]">
         <div className={`${container} py-10 sm:py-12`}>
           <p className="text-[11px] font-semibold" style={{ color: RUST }}>
-            {t.contact.badge}
+            {L.badge}
           </p>
           <h1
             className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl"
             style={{ color: NAVY }}
           >
-            {t.contact.title}
+            {L.heroTitle}
           </h1>
           <p className="mt-4 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-[13px]">
-            {t.contact.desc}
+            {L.heroDesc}
           </p>
         </div>
       </section>
@@ -439,16 +511,16 @@ const Contact: React.FC = () => {
                     ✓
                   </div>
                   <h4 className="text-base font-bold" style={{ color: NAVY }}>
-                    {t.contact.successTitle}
+                    {L.successTitle}
                   </h4>
-                  <p className="mt-2 text-xs text-slate-600">{t.contact.successDesc}</p>
+                  <p className="mt-2 text-xs text-slate-600">{L.successDesc}</p>
                   <button
                     type="button"
                     onClick={resetForm}
                     className="mt-5 rounded-md px-5 py-2.5 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
                     style={{ backgroundColor: RUST }}
                   >
-                    {t.contact.btnNewMessage}
+                    {L.btnNew}
                   </button>
                 </div>
               ) : (
@@ -471,189 +543,250 @@ const Contact: React.FC = () => {
                     aria-hidden="true"
                   />
 
-                  {/* ---- 1. Personal details ---- */}
-                  <Section num={1} title={L.secPersonal} />
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {renderField({
-                      label: L.name,
-                      name: "name",
-                      required: true,
-                      placeholder: L.phName,
-                    })}
-                    {renderField({
-                      label: L.parentName,
-                      name: "fatherName",
-                      required: true,
-                      placeholder: L.phParent,
-                    })}
-                    {renderField({
-                      label: L.phone,
-                      name: "phone",
-                      required: true,
-                      type: "tel",
-                      placeholder: "+91 98765 43210",
-                    })}
-                    {renderField({
-                      label: L.email,
-                      name: "email",
-                      type: "email",
-                      placeholder: "name@example.com",
-                    })}
-                  </div>
+                  {/* ---- 1. Select post (pehle post select karna hai) ---- */}
+                  <Section num={1} title={L.secPost} />
 
-                  {/* ---- 2. Address ---- */}
-                  <Section num={2} title={L.secAddress} action={manualToggle} />
-
-                  {!manualMode ? (
+                  {!selectedPost ? (
                     <>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        {renderField({
-                          label: L.pincode,
-                          name: "pincode",
-                          required: true,
-                          placeholder: "e.g. 282001",
-                          inputMode: "numeric",
-                          maxLength: 6,
-                        })}
-                        {renderField({
-                          label: L.village,
-                          name: "village",
-                          required: true,
-                        })}
-                      </div>
-
-                      <p className="-mt-1 text-[10px] text-slate-500">{L.pincodeHelp}</p>
-                      {pinStatus === "loading" && (
-                        <p className="text-[11px] font-semibold" style={{ color: NAVY }}>
-                          {L.pincodeLoading}
-                        </p>
-                      )}
-                      {pinStatus === "error" && (
-                        <p className="text-[11px] font-semibold text-red-600">{L.pincodeError}</p>
-                      )}
-
-                      {postOffices.length > 1 && (
-                        <div>
-                          <label className={labelClass} style={{ color: NAVY }}>
-                            {L.postOffice}
-                            <Req />
-                          </label>
-                          <select
-                            name="postOffice"
-                            required
-                            value={form.postOffice}
-                            onChange={handleChange}
-                            className={inputClass}
+                      <p className="text-[10px] text-slate-500">{L.postHelp}</p>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {POSTS.map((p, idx) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => {
+                              setSubmitError(null);
+                              setForm((f) => ({ ...f, appliedPost: p.id }));
+                            }}
+                            className="flex items-center gap-2 rounded border border-slate-200 bg-white px-3 py-2.5 text-left text-xs font-semibold transition hover:border-[#0B2545] hover:bg-slate-50"
+                            style={{ color: NAVY }}
                           >
-                            <option value="">{L.selectPostOffice}</option>
-                            {postOffices.map((po) => (
-                              <option key={po.Name} value={po.Name}>
-                                {po.Name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        {renderField({
-                          label: L.state,
-                          name: "state",
-                          disabled: true,
-                          placeholder: L.autoFilled,
-                          value: form.state,
-                        })}
-                        {renderField({
-                          label: L.district,
-                          name: "district",
-                          disabled: true,
-                          placeholder: L.autoFilled,
-                          value: form.district,
-                        })}
-                        {renderField({
-                          label: L.block,
-                          name: "block",
-                          disabled: true,
-                          placeholder: L.autoFilled,
-                          value: form.block,
-                        })}
+                            <span className="w-4 shrink-0 text-[10px] font-bold text-slate-400">
+                              {idx + 1}
+                            </span>
+                            <span>{hi ? p.hi : p.en}</span>
+                          </button>
+                        ))}
                       </div>
                     </>
                   ) : (
-                    <>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        {renderField({
-                          label: L.village,
-                          name: "village",
-                          required: true,
-                        })}
-                        <div className="min-w-0">
-                          <label className={labelClass} style={{ color: NAVY }}>
-                            {L.state}
-                            <Req />
-                          </label>
-                          <select
-                            name="state"
-                            required
-                            value={form.state}
-                            onChange={handleChange}
-                            className={inputClass}
-                          >
-                            <option value="">{L.selectState}</option>
-                            {INDIAN_STATES.map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                    <div className="flex items-center justify-between gap-3 rounded bg-[#E6EDF4] px-4 py-3">
+                      <div>
+                        <p className="text-[10px] font-semibold text-slate-500">{L.selectedPost}</p>
+                        <p className="text-sm font-bold" style={{ color: NAVY }}>
+                          {hi ? selectedPost.hi : selectedPost.en}
+                        </p>
                       </div>
-
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div className="min-w-0">
-                          <label className={labelClass} style={{ color: NAVY }}>
-                            {L.district}
-                            <Req />
-                          </label>
-                          <select
-                            name="district"
-                            required
-                            value={form.district}
-                            onChange={handleChange}
-                            disabled={!form.state}
-                            className={inputClass}
-                          >
-                            <option value="">
-                              {form.state ? L.selectDistrictReady : L.selectDistrict}
-                            </option>
-                            {districtOptions.map((d) => (
-                              <option key={d} value={d}>
-                                {d}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        {renderField({
-                          label: L.block,
-                          name: "block",
-                          required: true,
-                          disabled: !form.district,
-                          placeholder: form.district
-                            ? L.blockPlaceholderReady
-                            : L.blockPlaceholderLocked,
-                        })}
-                      </div>
-                    </>
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, appliedPost: "" }))}
+                        className="text-[11px] font-semibold hover:underline"
+                        style={{ color: RUST }}
+                      >
+                        {L.changePost}
+                      </button>
+                    </div>
                   )}
 
-                  {renderField({ label: L.address, name: "address", required: true })}
+                  {/* Baaki form tabhi dikhega jab post select ho jaye */}
+                  {selectedPost && (
+                    <>
+                      {/* ---- 2. Personal details ---- */}
+                      <Section num={2} title={L.secPersonal} />
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {renderField({
+                          label: L.name,
+                          name: "name",
+                          required: true,
+                          placeholder: L.phName,
+                        })}
+                        {renderField({
+                          label: L.parentName,
+                          name: "fatherName",
+                          required: true,
+                          placeholder: L.phParent,
+                        })}
+                        {renderField({
+                          label: L.phone,
+                          name: "phone",
+                          required: true,
+                          type: "tel",
+                          inputMode: "numeric",
+                          maxLength: 10,
+                          placeholder: "98765 43210",
+                        })}
+                        {renderField({
+                          label: L.email,
+                          name: "email",
+                          type: "email",
+                          placeholder: "name@example.com",
+                        })}
+                      </div>
 
-                  {/* ---- 3. Background ---- */}
-                  <Section num={3} title={L.secBackground} />
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {renderField({ label: L.education, name: "education", required: true })}
-                    {renderField({ label: L.occupation, name: "occupation", required: true })}
-                  </div>
+                      {/* ---- 3. Address ---- */}
+                      <Section num={3} title={L.secAddress} action={manualToggle} />
+
+                      {!manualMode ? (
+                        <>
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {renderField({
+                              label: L.pincode,
+                              name: "pincode",
+                              required: true,
+                              placeholder: "e.g. 282001",
+                              inputMode: "numeric",
+                              maxLength: 6,
+                            })}
+                            {renderField({
+                              label: L.village,
+                              name: "village",
+                              required: true,
+                            })}
+                          </div>
+
+                          <p className="-mt-1 text-[10px] text-slate-500">{L.pincodeHelp}</p>
+                          {pinStatus === "loading" && (
+                            <p className="text-[11px] font-semibold" style={{ color: NAVY }}>
+                              {L.pincodeLoading}
+                            </p>
+                          )}
+                          {pinStatus === "error" && (
+                            <p className="text-[11px] font-semibold text-red-600">
+                              {L.pincodeError}
+                            </p>
+                          )}
+
+                          {postOffices.length > 1 && (
+                            <div>
+                              <label className={labelClass} style={{ color: NAVY }}>
+                                {L.postOffice}
+                                <Req />
+                              </label>
+                              <select
+                                name="postOffice"
+                                required
+                                value={form.postOffice}
+                                onChange={handleChange}
+                                className={inputClass}
+                              >
+                                <option value="">{L.selectPostOffice}</option>
+                                {postOffices.map((po) => (
+                                  <option key={po.Name} value={po.Name}>
+                                    {po.Name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            {renderField({
+                              label: L.state,
+                              name: "state",
+                              disabled: true,
+                              placeholder: L.autoFilled,
+                              value: form.state,
+                            })}
+                            {renderField({
+                              label: L.district,
+                              name: "district",
+                              disabled: true,
+                              placeholder: L.autoFilled,
+                              value: form.district,
+                            })}
+                            {renderField({
+                              label: L.block,
+                              name: "block",
+                              disabled: true,
+                              placeholder: L.autoFilled,
+                              value: form.block,
+                            })}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {renderField({
+                              label: L.village,
+                              name: "village",
+                              required: true,
+                            })}
+                            <div className="min-w-0">
+                              <label className={labelClass} style={{ color: NAVY }}>
+                                {L.state}
+                                <Req />
+                              </label>
+                              <select
+                                name="state"
+                                required
+                                value={form.state}
+                                onChange={handleChange}
+                                className={inputClass}
+                              >
+                                <option value="">{L.selectState}</option>
+                                {INDIAN_STATES.map((s) => (
+                                  <option key={s} value={s}>
+                                    {s}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div className="min-w-0">
+                              <label className={labelClass} style={{ color: NAVY }}>
+                                {L.district}
+                                <Req />
+                              </label>
+                              <select
+                                name="district"
+                                required
+                                value={form.district}
+                                onChange={handleChange}
+                                disabled={!form.state}
+                                className={inputClass}
+                              >
+                                <option value="">
+                                  {form.state ? L.selectDistrictReady : L.selectDistrict}
+                                </option>
+                                {districtOptions.map((d) => (
+                                  <option key={d} value={d}>
+                                    {d}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            {renderField({
+                              label: L.block,
+                              name: "block",
+                              required: true,
+                              disabled: !form.district,
+                              placeholder: form.district
+                                ? L.blockPlaceholderReady
+                                : L.blockPlaceholderLocked,
+                            })}
+                          </div>
+                        </>
+                      )}
+
+                      {renderField({ label: L.address, name: "address", required: true })}
+
+                      {/* ---- 4. Education & experience ---- */}
+                      <Section num={4} title={L.secBackground} />
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {renderField({ label: L.education, name: "education", required: true })}
+                        {renderField({ label: L.occupation, name: "occupation", required: true })}
+                      </div>
+                      {renderField({
+                        label: L.experience,
+                        name: "experience",
+                        textarea: true,
+                        maxLength: 500,
+                        placeholder: L.phExperience,
+                      })}
+                    </>
+                  )}
 
                   {submitError && (
                     <p className="text-[11px] font-semibold text-red-600">{submitError}</p>
@@ -663,7 +796,7 @@ const Contact: React.FC = () => {
                     <span className="text-[10px] text-slate-500">{L.required}</span>
                     <button
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || !selectedPost}
                       className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                       style={{ backgroundColor: RUST }}
                     >

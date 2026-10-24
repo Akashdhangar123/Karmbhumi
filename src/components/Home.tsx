@@ -136,37 +136,70 @@ const Home: React.FC = () => {
           }}
         />
 
-        <div className={`${container} relative py-12 lg:py-[44px]`}>
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12">
-            {/* Left */}
-            <div className="lg:col-span-6">
-              <p className="text-xs font-semibold tracking-wide" style={{ color: RUST }}>
-                {t.home.badge}
-              </p>
+       {/* Hero: centered letterhead-style design */}
+        <div className="relative" style={{ backgroundColor: "#ECEBEA" }}>
+          <div className={`${container} relative py-10 lg:py-14`}>
+            {/* Top: small logo + company details (left aligned like the letterhead) */}
+            {/* <div className="flex items-start gap-3 sm:gap-4">
+              <div className="leading-snug">
+                <p className="text-base font-bold sm:text-xl" style={{ color: "#E5231B" }}>
+                  Karmbhumi India Limited
+                </p>
+                <p className="mt-1 max-w-xl text-[11px] leading-relaxed text-slate-700 sm:text-sm">
+                  Regd. Office : Surya Complex, Sarveshwari Nagar, Naka Bypass, Faizabad, (U.P.), INDIA
+                  <br />
+                  Regd. No. U70102UP2012PLC053219
+                  <br />
+                  Query us: www.mca21.gov.in
+                  <br />
+                  visit us : www.karmbhumiindia.com
+                </p>
+              </div>
+            </div> */}
 
+            {/* Center content */}
+            <div className="mt-8 flex flex-col items-center text-center lg:mt-10">
+              {/* Big title */}
               <h1
-                className="mt-5 text-4xl font-bold leading-[1.15] tracking-tight sm:text-5xl lg:text-[52px]"
-                style={{ color: NAVY }}
+                className="text-4xl font-extrabold leading-[1.15] tracking-tight sm:text-6xl lg:text-[72px]"
+                style={{ color: "#E5231B" }}
               >
                 {t.home.title1} {t.home.title2}
               </h1>
 
+              {/* Center big logo */}
+              {/* Center big logo */}
+              <div className="mt-8 flex h-[400px] w-[400px] items-center justify-center sm:h-[480px] sm:w-[480px] lg:mt-10 lg:h-[520px] lg:w-[520px]">
+                <img
+                  src="/img/Karmbhumi.png"
+                  alt="कर्मभूमि इंडिया लिमिटेड लोगो"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+
+              {/* Slogan */}
               <p
-                className="mt-5 text-xl font-semibold sm:text-2xl"
+                className="mt-8 text-2xl font-bold sm:text-4xl lg:text-[44px]"
                 style={{ color: RUST }}
               >
                 {t.home.slogan}
               </p>
 
-              <p className="mt-4 whitespace-pre-line text-base font-normal leading-relaxed text-slate-600 sm:text-lg">
+              {/* Couplet */}
+              <p
+                className="mt-3 max-w-3xl whitespace-pre-line text-base font-bold leading-relaxed sm:text-xl lg:text-2xl"
+                style={{ color: NAVY }}
+              >
                 {t.home.couplet}
               </p>
 
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
+              {/* Description */}
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
                 {t.home.desc}
               </p>
 
-              <div className="mt-7 flex flex-wrap items-center gap-6">
+              {/* Buttons */}
+              {/* <div className="mt-8 flex flex-wrap items-center justify-center gap-6">
                 <Link
                   to="/investment-plans"
                   className="inline-flex items-center gap-2 rounded-md px-6 py-3.5 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-95"
@@ -184,50 +217,7 @@ const Home: React.FC = () => {
                   <span>{t.home.btnBank}</span>
                   <Arrow />
                 </Link>
-              </div>
-            </div>
-
-            {/* Right: Founder card */}
-            <div className="lg:col-span-6 lg:pl-8">
-              <div
-                className="mx-auto w-full max-w-[560px] overflow-hidden rounded-lg shadow-xl lg:max-w-[560px]"
-                style={{ backgroundColor: NAVY }}
-              >
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-800">
-                  {!speechImgError ? (
-                    <img
-                      src={FOUNDER_SPEECH_IMG}
-                      alt="Dr. Shiv Karan Karmayoddha addressing public meeting"
-                      onError={() => setSpeechImgError(true)}
-                      className="h-full w-full object-cover object-center"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center text-gray-300">
-                      <p className="text-sm font-bold text-amber-300">कर्मभूमि इंडिया लिमिटेड</p>
-                      <p className="mt-1 text-xs text-gray-400">संस्थापक उद्बोधन एवं सम्मेलन</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="px-5 py-4">
-                  <p className="text-[11px] font-medium text-slate-200">
-                    {hi ? "संस्थापक उद्बोधन एवं जनसंवाद" : "Founder Keynote & Public Address"}
-                  </p>
-                  <p className="mt-1.5 text-xl font-bold text-white sm:text-[22px]">
-                    {t.home.founderName}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-300">
-                    {hi
-                      ? "संस्थापक, कर्मभूमि इंडिया लिमिटेड · मार्गदर्शक एवं मुख्य संरक्षक"
-                      : "Founder, Karmbhumi India Limited · Mentor & Chief Guide"}
-                  </p>
-                  <p className="mt-1.5 text-[11px] font-medium text-white">
-                    {hi
-                      ? "✨ 18+ वर्षों का अटूट जनविश्वास · Pan India"
-                      : "✨ 18+ Years of Public Trust · Pan India"}
-                  </p>
-                </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
