@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
               </div>
               <div className="leading-tight">
                 <p className="text-sm font-bold text-white">
-                  {hi ? "कर्मभूमि इंडिया लिमिटेड" : "Karmbhumi India Limited"}
+                  {hi ? "कर्मभूमि इण्डिया लिमिटेड" : "Karmbhumi India Limited"}
                 </p>
                 <p className="mt-0.5 text-[10px] italic text-amber-400">
                   {hi ? "“जहाँ कर्म ही पूजा है...”" : "“Where Work is Worshipped...”"}

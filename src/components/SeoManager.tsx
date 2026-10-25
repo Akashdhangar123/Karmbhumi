@@ -46,14 +46,24 @@ const PAGES: Record<string, PageSeo> = {
       hi: "कर्मभूमि इंडिया लिमिटेड के 'कर्मभूमि बैंक ऑफ इंडिया' मिशन के बारे में जानें, जो जन-सहभागिता, सहकारिता और ठोस परिसंपत्तियों पर आधारित है।",
     },
   },
-  "/investment-plans": {
+   "/founder-profile": {
     title: {
-      en: "Investment Plans | Karmbhumi India Limited",
-      hi: "निवेश योजनाएं | कर्मभूमि इंडिया लिमिटेड",
+      en: "Dr. Shiv Karan Karmayoddha | Founder, Karmbhumi India Limited",
+      hi: "डॉ. शिव करन कर्मयोद्धा | संस्थापक, कर्मभूमि इंडिया लिमिटेड",
     },
     description: {
-      en: "Explore the investment plans of Karmbhumi India Limited, based on a cooperative model and real estate assets. Read the details and contact us.",
-      hi: "कर्मभूमि इंडिया लिमिटेड की निवेश योजनाएं देखें, जो सहकारी मॉडल और रियल एस्टेट परिसंपत्तियों पर आधारित हैं। विवरण पढ़ें और हमसे संपर्क करें।",
+      en: "Read the founder profile of Dr. Shiv Karan Karmayoddha, founder of Karmbhumi India Limited, and his vision for cooperative growth and self-reliance in India.",
+      hi: "कर्मभूमि इंडिया लिमिटेड के संस्थापक डॉ. शिव करन कर्मयोद्धा का प्रोफ़ाइल पढ़ें और भारत में सहकारी विकास व आत्मनिर्भरता के उनके विजन को जानें।",
+    },
+  },
+  "/karmbhumi-institution": {
+    title: {
+      en: "Karmbhumi Institution | Karmbhumi India Limited",
+      hi: "कर्मभूमि संस्था | कर्मभूमि इंडिया लिमिटेड",
+    },
+    description: {
+      en: "Learn about the Karmbhumi Institution, its objectives, activities and role in cooperative growth and self-reliance across India.",
+      hi: "कर्मभूमि संस्था के उद्देश्यों, गतिविधियों और पूरे भारत में सहकारी विकास व आत्मनिर्भरता में इसकी भूमिका के बारे में जानें।",
     },
   },
   "/contact": {

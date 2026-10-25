@@ -12,6 +12,23 @@ const FONT = "'Manrope', 'Noto Sans Devanagari', 'Segoe UI', Arial, sans-serif";
 const NAVY = "#0B2545";
 const RUST = "#B84A12";
 
+type PillarText = {
+  title: string;
+  desc: string;
+  pointsTitle?: string;
+  points?: string[];
+};
+
+// Icons pillars ke order me hain (translations.ts ke pillars ka same order)
+const PILLAR_ICONS: React.ReactNode[] = [
+  <path key="i1" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />,
+  <path key="i2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />,
+  <path key="i3" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V10l5 3V10l5 3V6h4v15M9 17h2M14 17h2" />,
+  <path key="i4" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 10l9-6 9 6M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18" />,
+  <path key="i5" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 21h16M6 21V9l6-5 6 5v12M10 21v-6h4v6" />,
+  <path key="i6" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />,
+];
+
 const Arrow: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -21,93 +38,13 @@ const Arrow: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
 const Home: React.FC = () => {
   const [founderImgError, setFounderImgError] = useState(false);
 
-  const { t, lang } = useLanguage();
-  const hi = lang === "hi";
+  const { t } = useLanguage();
+  const h = t.home;
 
-  // ---------- DATA ----------
-  const STATS = hi
-    ? [
-        { n: "36", l: "राज्य / केंद्रशासित प्रदेश", sub: "पैन-इंडिया विस्तार" },
-        { n: "707", l: "जिले", sub: "प्रशासनिक पहुँच" },
-        { n: "5,410", l: "तहसील", sub: "स्थानीय समन्वय" },
-        { n: "6,612", l: "विकास खंड", sub: "जमीनी संगठन" },
-      ]
-    : [
-        { n: "36", l: "States / UTs", sub: "Pan-India Expansion" },
-        { n: "707", l: "Districts", sub: "Administrative Reach" },
-        { n: "5,410", l: "Tehsils", sub: "Local Coordination" },
-        { n: "6,612", l: "Development Blocks", sub: "Grassroot Organization" },
-      ];
-
-  const FACTS = hi
-    ? [
-        { label: "कम्पनी का नाम", value: "कर्मभूमि इंडिया लिमिटेड" },
-        { label: "संस्थापक", value: "डॉ. शिव करन कर्मयोद्धा" },
-        { label: "स्थापना व निगमन", value: "18 जून 2006 (निगमन: 22 अक्टूबर 2012)" },
-        { label: "कम्पनी का प्रकार", value: "पब्लिक लिमिटेड (अंशधारिता से निगमित)" },
-        { label: "कार्यक्षेत्र", value: "सम्पूर्ण भारत (अनुसूचित राज्यों को छोड़कर)" },
-        { label: "मुख्य व्यवसाय", value: "रियल एस्टेट, उत्पाद एवं सेवा उद्योग" },
-        { label: "केंद्रीय उद्देश्य", value: "कर्मभूमि बैंक ऑफ इंडिया की स्थापना" },
-        { label: "मूल मंत्र", value: "सहभागिता से पूँजी निर्माण, सहकारिता से विस्तार" },
-      ]
-    : [
-        { label: "Company Name", value: "Karmbhumi India Limited" },
-        { label: "Founder", value: "Dr. Shiv Karan Karmayoddha" },
-        { label: "Establishment & Incorp.", value: "18 June 2006 (Incorp: 22 Oct 2012)" },
-        { label: "Company Type", value: "Public Limited (Incorporated by Shares)" },
-        { label: "Jurisdiction", value: "Pan India (Except Scheduled Territories)" },
-        { label: "Core Business", value: "Real Estate, Products & Services" },
-        { label: "Primary Mission", value: "Establishment of Karmbhumi Bank of India" },
-        { label: "Core Mantra", value: "Capital through Participation, Expansion via Cooperation" },
-      ];
-
-  const PILLARS = hi
-    ? [
-        {
-          title: "रियल एस्टेट एवं परिसंपत्ति सुरक्षा",
-          desc: "भूमि और संपत्तियों में ठोस निवेश द्वारा समर्थित, जिससे प्रत्येक सहभागिता सुदृढ़ परिसंपत्तियों से सुरक्षित रहती है।",
-          icon: (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 21V5a1 1 0 011-1h9a1 1 0 011 1v16M15 9h4a1 1 0 011 1v11M3 21h18M8 8h3M8 12h3M8 16h3" />
-          ),
-        },
-        {
-          title: "सहकारी आर्थिक मॉडल",
-          desc: "ऐसी वित्तीय संरचना जो कुछ के लिए नहीं, बल्कि मेहनतकश नागरिकों के सामूहिक उत्थान के लिए बनी है।",
-          icon: (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 7h18v4H3zM5 11v9h14v-9M10 15h4" />
-          ),
-        },
-        {
-          title: "पारदर्शिता एवं सुशासन",
-          desc: "MCA-पंजीकृत कॉर्पोरेट ढांचा, जो कानूनी, वैधानिक और नैतिक शासन मानकों का कड़ाई से पालन करता है।",
-          icon: (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 11a3 3 0 100-6 3 3 0 000 6zM8 11a3 3 0 100-6 3 3 0 000 6zM2 20a6 6 0 0112 0M14 20a6 6 0 018 0" />
-          ),
-        },
-      ]
-    : [
-        {
-          title: "Real Estate & Asset Security",
-          desc: "Backed by tangible investments in land and properties, ensuring every participation is supported by solid assets.",
-          icon: (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 21V5a1 1 0 011-1h9a1 1 0 011 1v16M15 9h4a1 1 0 011 1v11M3 21h18M8 8h3M8 12h3M8 16h3" />
-          ),
-        },
-        {
-          title: "Cooperative Economic Model",
-          desc: "A financial structure designed not for a few, but for the collective upliftment of hardworking citizens.",
-          icon: (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 7h18v4H3zM5 11v9h14v-9M10 15h4" />
-          ),
-        },
-        {
-          title: "Transparency & Governance",
-          desc: "An MCA-registered corporate framework strictly adhering to legal, statutory, and ethical governance standards.",
-          icon: (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 11a3 3 0 100-6 3 3 0 000 6zM8 11a3 3 0 100-6 3 3 0 000 6zM2 20a6 6 0 0112 0M14 20a6 6 0 018 0" />
-          ),
-        },
-      ];
+  // Translations se data
+  const STATS = h.stats;
+  const PILLARS = h.pillars as PillarText[];
+  const PEN_PARAS = h.penParas as string[];
 
   const container = "mx-auto w-full max-w-[1440px] px-5 sm:px-8";
 
@@ -134,87 +71,59 @@ const Home: React.FC = () => {
           }}
         />
 
-        {/* Hero: centered letterhead-style design */}
+        {/* Hero: title + logo on the right, text on the left */}
         <div className="relative" style={{ backgroundColor: "#ECEBEA" }}>
           <div className={`${container} relative py-10 lg:py-14`}>
-            {/* Top: company details (left aligned like the letterhead) */}
-            {/* <div className="flex items-start gap-3 sm:gap-4">
-              <div className="leading-snug">
-                <p className="text-base font-bold sm:text-xl" style={{ color: "#E5231B" }}>
-                  Karmbhumi India Limited
-                </p>
-                <p className="mt-1 max-w-xl text-[11px] leading-relaxed text-slate-700 sm:text-sm">
-                  Regd. Office : Surya Complex, Sarveshwari Nagar, Naka Bypass, Faizabad, (U.P.), INDIA
-                  <br />
-                  Regd. No. U70102UP2012PLC053219
-                  <br />
-                  Query us: www.mca21.gov.in
-                  <br />
-                  visit us : www.karmbhumiindia.com
-                </p>
-              </div>
-            </div> */}
-
-            {/* Center content */}
-            <div className="mt-8 flex flex-col items-center text-center lg:mt-10">
-              {/* Big title */}
-              <h1
-                className="text-4xl font-extrabold leading-[1.15] tracking-tight sm:text-6xl lg:text-[72px]"
-                style={{ color: "#E5231B" }}
-              >
-                {t.home.title1} {t.home.title2}
-              </h1>
-
-              {/* Center big logo */}
-              <div className="mt-8 flex h-[400px] w-[400px] items-center justify-center sm:h-[480px] sm:w-[480px] lg:mt-10 lg:h-[520px] lg:w-[520px]">
-                <img
-                  src="/img/Karmbhumi.png"
-                  alt="कर्मभूमि इंडिया लिमिटेड लोगो"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-
-              {/* Slogan */}
-              <p
-                className="mt-8 text-2xl font-bold sm:text-4xl lg:text-[44px]"
-                style={{ color: RUST }}
-              >
-                {t.home.slogan}
-              </p>
-
-              {/* Couplet */}
-              <p
-                className="mt-3 max-w-3xl whitespace-pre-line text-base font-bold leading-relaxed sm:text-xl lg:text-2xl"
-                style={{ color: NAVY }}
-              >
-                {t.home.couplet}
-              </p>
-
-              {/* Description */}
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
-                {t.home.desc}
-              </p>
-
-              {/* Buttons */}
-              {/* <div className="mt-8 flex flex-wrap items-center justify-center gap-6">
-                <Link
-                  to="/investment-plans"
-                  className="inline-flex items-center gap-2 rounded-md px-6 py-3.5 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-95"
-                  style={{ backgroundColor: RUST }}
+            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12">
+              {/* RIGHT on desktop: Title + Logo (mobile par sabse upar) */}
+              <div className="flex flex-col items-center text-center lg:order-2">
+                <h1
+                  className="text-4xl font-extrabold leading-[1.15] tracking-tight sm:text-6xl lg:text-[56px] xl:text-[64px]"
+                  style={{ color: "#E5231B" }}
                 >
-                  <span>{t.home.btnPlans}</span>
-                  <Arrow />
-                </Link>
+                  {h.title1} {h.title2}
+                </h1>
 
-                <Link
-                  to="/karmbhoomi-bank"
-                  className="inline-flex items-center gap-2 text-sm font-semibold hover:underline"
+                <div className="mt-6 flex h-[250px] w-[250px] items-center justify-center sm:h-[320px] sm:w-[320px] lg:h-[340px] lg:w-[340px] xl:h-[400px] xl:w-[400px]">
+                  <img
+                    src="/img/Karmbhumi.png"
+                    alt={h.logoAlt}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              </div>
+
+              {/* LEFT on desktop: Slogan + Couplet + Description */}
+              <div className="text-center lg:order-1 lg:text-left">
+                <p
+                  className="text-2xl font-bold sm:text-4xl lg:text-[40px] lg:leading-tight"
+                  style={{ color: RUST }}
+                >
+                  {h.slogan}
+                </p>
+
+                <p
+                  className="mt-4 whitespace-pre-line text-base font-bold leading-relaxed sm:text-xl lg:text-2xl"
                   style={{ color: NAVY }}
                 >
-                  <span>{t.home.btnBank}</span>
-                  <Arrow />
-                </Link>
-              </div> */}
+                  {h.couplet}
+                </p>
+
+                <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg lg:mx-0 mx-auto">
+                  {h.desc}
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-center gap-6">
+                  <Link
+                    to="/About"
+                    className="inline-flex items-center gap-2 rounded-md px-6 py-3.5 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-95"
+                    style={{ backgroundColor: RUST }}
+                  >
+                    <span>{h.btnPlans}</span>
+                    <Arrow />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -225,12 +134,8 @@ const Home: React.FC = () => {
         <div className={`${container} pt-12 sm:pt-14`}>
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
             <div className="lg:col-span-4">
-              <p className="text-[11px] font-semibold text-amber-400">
-                {hi ? "कम्पनी अवलोकन" : "Company Overview"}
-              </p>
-              <h2 className="mt-2 text-2xl font-bold sm:text-[28px]">
-                {hi ? "एक नज़र में कम्पनी" : "Company at a Glance"}
-              </h2>
+              <p className="text-[11px] font-semibold text-amber-400">{h.overviewBadge}</p>
+              <h2 className="mt-2 text-2xl font-bold sm:text-[28px]">{h.overviewTitle}</h2>
             </div>
 
             <div className="grid grid-cols-2 gap-y-8 lg:col-span-8 lg:grid-cols-4">
@@ -252,119 +157,110 @@ const Home: React.FC = () => {
           </div>
 
           <div className="mt-10 flex flex-col items-start justify-between gap-3 border-t border-white/15 py-5 sm:flex-row sm:items-center">
-            <p className="text-xs text-slate-300">
-              {hi
-                ? "सहभागिता से पूँजी निर्माण, सहकारिता से विस्तार"
-                : "Capital through Participation, Expansion via Cooperation"}
-            </p>
-            <Link
-              to="/karmbhoomi-bank"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white hover:underline"
-            >
-              <span>{t.home.btnBank}</span>
-              <Arrow className="w-3.5 h-3.5" />
-            </Link>
+            <p className="text-xs text-slate-300">{h.mantra}</p>
           </div>
         </div>
       </section>
 
-      {/* ================= COMPANY AT A GLANCE ================= */}
+      {/* ================= MAHATVAKANKSHA (Founder's pen) ================= */}
       <section className={`${container} pt-14 sm:pt-16`}>
-        <h2 className="text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
-          {hi ? "एक नज़र में कम्पनी" : "Company at a Glance"}
-        </h2>
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-stretch lg:gap-14">
+          {/* LEFT: content */}
+          <div>
+            <p className="text-[11px] font-semibold" style={{ color: RUST }}>
+              {h.penBadge}
+            </p>
 
-        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {FACTS.map((f) => (
-            <div key={f.label} className="rounded-md bg-[#EEF2F6] px-4 py-3.5">
-              <p className="text-[10px] font-medium text-slate-500">{f.label}</p>
-              <p className="mt-1.5 text-sm font-semibold leading-snug" style={{ color: NAVY }}>
-                {f.value}
-              </p>
+            <h2 className="mt-2 text-2xl font-bold leading-snug sm:text-[32px]" style={{ color: NAVY }}>
+              {h.penTitle}
+            </h2>
+
+            <div className="mt-5 space-y-4 text-sm leading-7 text-slate-700 sm:text-[15px] sm:leading-8">
+              {PEN_PARAS.map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
             </div>
-          ))}
+
+            <div className="mt-6 border-l-4 pl-4" style={{ borderColor: RUST }}>
+              <p className="text-sm font-bold sm:text-base" style={{ color: NAVY }}>
+                {h.penAuthor}
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">{h.penAuthorSub}</p>
+            </div>
+          </div>
+
+          {/* RIGHT: image - desktop par left text ki poori height ke barabar */}
+          <div className="relative aspect-[3/2] overflow-hidden rounded-lg shadow-xl lg:aspect-auto">
+            <img
+              src="/img/pehla-kadam.png"
+              alt={h.penImageAlt}
+              className="absolute inset-0 h-full w-full object-cover object-center"
+            />
+          </div>
         </div>
-      </section>
-
-      {/* ================= SYMBOL OF PUBLIC PARTICIPATION ================= */}
-      <section className={`${container} pt-14 sm:pt-16`}>
-        <h2 className="text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
-          {hi
-            ? "राष्ट्र निर्माण में सहभागिता और जन-विश्वास का प्रतीक"
-            : "Symbol of Public Participation & National Trust"}
-        </h2>
-
-        <p className="mt-4 text-xs text-slate-600">
-          {hi ? "पारदर्शी नीतियां एवं राष्ट्रीय विजन" : "Transparent Governance & National Vision"}
-        </p>
-
-        <p className="mt-4 max-w-4xl text-xs leading-relaxed text-slate-600 sm:text-[13px]">
-          {hi
-            ? "कर्मभूमि इंडिया लिमिटेड संपूर्ण भारत में सहकारिता, रियल एस्टेट और उत्पाद एवं सेवा क्षेत्र के माध्यम से आत्मनिर्भरता की नई गाथा लिख रहा है। हमारा मुख्य संकल्प 'कर्मभूमि बैंक ऑफ इंडिया' की स्थापना कर प्रत्येक नागरिक को वित्तीय संबल प्रदान करना है।"
-            : "Karmbhumi India Limited is scripting a new saga of self-reliance across India through cooperation, real estate, and product-service sectors. Our central mission is the establishment of Karmbhumi Bank of India."}
-        </p>
-
-        <p className="mt-4 text-xs text-slate-600 sm:text-[13px]">
-          {hi
-            ? "प्रेस व मीडिया में पारदर्शी छवि — प्रत्येक कार्य सार्वजनिक व नियमबद्ध"
-            : "Transparent Media Presence — Fully compliant and verified"}
-        </p>
-        <p className="mt-4 text-xs text-slate-600 sm:text-[13px]">
-          {hi
-            ? "सहकारिता से पूंजी निर्माण — जन-जन की सामूहिक शक्ति"
-            : "Cooperative Capital Growth — Collective strength of investors"}
-        </p>
-
-        <Link
-          to="/about"
-          className="mt-4 inline-block text-xs font-medium text-slate-600 hover:underline sm:text-[13px]"
-        >
-          {hi ? "संस्थान के बारे में विस्तार से जानें" : "Learn more about our institution"}
-        </Link>
       </section>
 
       {/* ================= CORE PILLARS ================= */}
       <section className={`${container} pb-16 pt-14 sm:pt-16`}>
         <p className="text-[11px] font-semibold" style={{ color: RUST }}>
-          {hi ? "मुख्य स्तंभ" : "Core Pillars"}
+          {h.pillarsBadge}
         </p>
         <h2 className="mt-2 text-2xl font-bold sm:text-[28px]" style={{ color: NAVY }}>
-          {hi ? "प्रमुख गतिविधियां एवं संस्थागत आधार" : "Key Activities & Institutional Foundations"}
+          {h.pillarsTitle}
         </h2>
+        <p className="mt-2 text-sm font-semibold text-slate-600">{h.pillarsSubtitle}</p>
 
-        <div className="mt-6">
-          {PILLARS.map((p) => (
+        <div className="mt-6 border-t border-slate-200">
+          {PILLARS.map((p, idx) => (
             <div
               key={p.title}
-              className="grid grid-cols-1 gap-3 border-b border-slate-200 py-5 md:grid-cols-12 md:items-center md:gap-6"
+              className="grid grid-cols-1 gap-3 border-b border-slate-200 py-5 md:grid-cols-12 md:items-start md:gap-6"
             >
-              <div className="flex items-center gap-4 md:col-span-5">
+              <div className="flex items-start gap-4 md:col-span-5">
+                <span
+                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                  style={{ backgroundColor: NAVY }}
+                >
+                  {idx + 1}
+                </span>
                 <svg
-                  className="h-4 w-4 shrink-0"
-                  style={{ color: NAVY }}
+                  className="mt-1 h-5 w-5 shrink-0"
+                  style={{ color: RUST }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  {p.icon}
+                  {PILLAR_ICONS[idx]}
                 </svg>
                 <h3 className="text-base font-semibold leading-snug sm:text-[17px]" style={{ color: NAVY }}>
                   {p.title}
                 </h3>
               </div>
-              <p className="text-xs leading-relaxed text-slate-600 md:col-span-7">{p.desc}</p>
+
+              <div className="md:col-span-7">
+                <p className="text-xs leading-relaxed text-slate-600 sm:text-[13px]">{p.desc}</p>
+
+                {p.points && p.points.length > 0 && (
+                  <div className="mt-3 rounded-md bg-[#EEF2F6] px-4 py-3.5">
+                    <p className="text-[11px] font-bold" style={{ color: RUST }}>
+                      {p.pointsTitle}
+                    </p>
+                    <ul className="mt-2 grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
+                      {p.points.map((pt, i) => (
+                        <li key={pt} className="flex items-center gap-2 text-xs text-slate-700">
+                          <span className="w-4 shrink-0 text-[10px] font-bold text-slate-400">
+                            {i + 1}.
+                          </span>
+                          <span>{pt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
-
-        <Link
-          to="/investment-plans"
-          className="mt-6 inline-flex items-center gap-2 rounded-md px-5 py-3 text-xs font-semibold text-white transition-all hover:brightness-125 active:scale-95"
-          style={{ backgroundColor: NAVY }}
-        >
-          <span>{t.home.btnPlans}</span>
-          <Arrow className="w-3.5 h-3.5" />
-        </Link>
       </section>
 
       {/* ================= FOUNDER'S MESSAGE ================= */}
@@ -375,12 +271,15 @@ const Home: React.FC = () => {
               {!founderImgError ? (
                 <img
                   src={DIRECTOR_PHOTO_SRC}
-                  alt={t.home.founderName}
+                  alt={h.founderName}
                   onError={() => setFounderImgError(true)}
                   className="h-full w-full object-cover object-top"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-lg font-bold text-white" style={{ backgroundColor: NAVY }}>
+                <div
+                  className="flex h-full w-full items-center justify-center text-lg font-bold text-white"
+                  style={{ backgroundColor: NAVY }}
+                >
                   Dr.
                 </div>
               )}
@@ -388,20 +287,18 @@ const Home: React.FC = () => {
 
             <div>
               <p className="text-[11px] font-semibold" style={{ color: RUST }}>
-                {hi ? "संस्थापक एवं मुख्य मार्गदर्शक" : "Founder & Chief Mentor"}
+                {h.founderBadge}
               </p>
               <h2 className="mt-2 text-2xl font-bold sm:text-[34px] sm:leading-tight" style={{ color: NAVY }}>
-                {hi ? "संस्थापक का प्रेरक संदेश" : "Founder’s Inspiring Message"}
+                {h.founderTitle}
               </h2>
 
               <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-[15px]">
-                “{t.home.founderQuote}”
+                “{h.founderQuote}”
               </p>
 
               <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-[15px]">
-                {hi
-                  ? "शिक्षा, समाज उत्थान और आर्थिक स्वावलंबन के क्षेत्र में कर्मभूमि परिवार निरंतर अग्रसर है। प्रतिभाओं का सम्मान और गरीब व वंचित वर्ग को आगे बढ़ाना हमारी सर्वोच्च प्राथमिकता है।"
-                  : "The Karmbhumi family is constantly striving in education, social upliftment, and economic independence. Honoring talents and empowering every section of society is our top priority."}
+                {h.founderNote}
               </p>
 
               <Link
@@ -409,7 +306,7 @@ const Home: React.FC = () => {
                 className="mt-5 inline-flex items-center gap-2 text-xs font-semibold hover:underline"
                 style={{ color: NAVY }}
               >
-                <span>{hi ? "पूरा प्रोफ़ाइल पढ़ें" : "Read Full Profile"}</span>
+                <span>{h.founderBtn}</span>
                 <Arrow className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -421,24 +318,20 @@ const Home: React.FC = () => {
       <section className="bg-[#E6EDF4]">
         <div className={`${container} py-12 sm:py-14`}>
           <p className="text-[11px] font-semibold" style={{ color: RUST }}>
-            {hi ? "हमसे जुड़ें" : "Join Us"}
+            {h.ctaBadge}
           </p>
           <h2 className="mt-3 max-w-4xl text-2xl font-bold leading-tight sm:text-[34px]" style={{ color: NAVY }}>
-            {hi
-              ? "कर्मभूमि बैंक ऑफ इंडिया आर्थिक आंदोलन से जुड़ें"
-              : "Join the Karmbhumi Bank of India Economic Movement"}
+            {h.ctaTitle}
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-[15px]">
-            {hi
-              ? "अपना वित्तीय भविष्य सुरक्षित करें और समतामूलक एवं आत्मनिर्भर भारत के निर्माण में योगदान दें। हमारी विश्वसनीय निवेश योजनाओं को जानें।"
-              : "Secure your financial future and contribute toward an egalitarian and self-reliant India. Explore our trusted investment schemes today."}
+            {h.ctaDesc}
           </p>
           <Link
             to="/contact"
             className="mt-6 inline-flex items-center gap-2 rounded-md px-5 py-3 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
             style={{ backgroundColor: RUST }}
           >
-            <span>{hi ? "संपर्क करें" : "Contact Us"}</span>
+            <span>{h.ctaBtn}</span>
             <Arrow className="w-3.5 h-3.5" />
           </Link>
         </div>

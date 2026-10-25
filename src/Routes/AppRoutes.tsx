@@ -5,7 +5,6 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Home from "../components/Home";
 import About from "../pages/About";
 import KarmbhoomiBank from "../pages/KarmbhoomiBank";
-import InvestmentPlans from "../pages/InvestmentPlans";
 import Contact from "../pages/Contact";
 import CPanel from "../pages/CPanel";
 import { LanguageProvider, useLanguage } from "../context/LanguageContext";
@@ -47,7 +46,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/karmbhoomi-bank" element={<KarmbhoomiBank />} />
-        <Route path="/investment-plans" element={<InvestmentPlans />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/AuthorProfile" element={<AuthorProfile />} />
 

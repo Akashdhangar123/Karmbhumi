@@ -20,8 +20,8 @@ const Header: React.FC = () => {
   const NAV_ITEMS = [
     { label: t.nav.home, to: "/" },
     { label: t.nav.about, to: "/about" },
-    { label: t.nav.plans, to: "/investment-plans" },
-    { label: t.nav.bank, to: "/karmbhoomi-bank" },
+    { label: hi ? "संस्थापक प्रोफ़ाइल" : "Founder Profile", to: "/AuthorProfile" },
+    { label: hi ? "कर्मभूमि संस्थाएँ" : "Karmbhumi Institutions", to: "" },
     { label: t.nav.contact, to: "/contact" },
   ];
 
@@ -67,7 +67,7 @@ const Header: React.FC = () => {
         <div className="mx-auto flex h-[26px] w-full max-w-[1440px] items-center justify-between px-5 sm:px-8">
           <span className="text-[11px] font-normal">
             {hi
-              ? "कर्मभूमि इंडिया लिमिटेड · जहाँ कर्म ही पूजा है"
+              ? "कर्मभूमि इण्डिया लिमिटेड · जहाँ कर्म ही पूजा है"
               : "Karmbhumi India Limited · Where work is worshiped"}
           </span>
           <LangPill />
@@ -95,7 +95,7 @@ const Header: React.FC = () => {
 
             {/* 3. India Limited */}
             <p className="text-lg  lg:text-2xl font-bold tracking-tight" style={{ color: NAVY }}>
-              {hi ? "इंडिया लिमिटेड" : "India Limited"}
+              {hi ? "इण्डिया लिमिटेड" : "India Limited"}
             </p>
           </Link>
 

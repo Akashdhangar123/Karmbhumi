@@ -19,6 +19,7 @@ const POSTS: { id: string; en: string; hi: string }[] = [
   { id: "HRM", en: "HRM", hi: "HRM" },
   { id: "ZO", en: "ZO", hi: "ZO" },
   { id: "GCM", en: "GCM", hi: "GCM" },
+  { id: "RM", en: "RM", hi: "RM" },
   { id: "DVM", en: "DVM", hi: "DVM" },
   { id: "DBM", en: "DBM", hi: "DBM" },
   { id: "SBM", en: "SBM", hi: "SBM" },
@@ -36,16 +37,9 @@ interface PostOfficeResult {
 
 type PinStatus = "idle" | "loading" | "success" | "error";
 
-const Arrow: React.FC<{ className?: string }> = ({ className = "w-3.5 h-3.5" }) => (
+const Arrow: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-  </svg>
-);
-
-const PinIcon: React.FC = () => (
-  <svg className="h-3 w-3" fill="none" stroke={NAVY} strokeWidth={2} viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21s7-6.2 7-11a7 7 0 10-14 0c0 4.8 7 11 7 11z" />
-    <circle cx="12" cy="10" r="2.5" />
   </svg>
 );
 
@@ -53,6 +47,8 @@ const EMPTY_FORM = {
   appliedPost: "",
   name: "",
   fatherName: "",
+  dateOfBirth: "",
+  aadhaarNumber: "",
   address: "",
   village: "",
   pincode: "",
@@ -62,11 +58,15 @@ const EMPTY_FORM = {
   state: "",
   education: "",
   occupation: "",
+  previousCompanyName: "",
   experience: "",
   phone: "",
   email: "",
   website: "", // honeypot
 };
+
+// Aaj ki date (YYYY-MM-DD) - janm tithi ki max limit ke liye
+const todayISO = () => new Date().toISOString().slice(0, 10);
 
 const Contact: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -77,19 +77,13 @@ const Contact: React.FC = () => {
   const [postOffices, setPostOffices] = useState<PostOfficeResult[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
 
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const hi = lang === "hi";
-
-  const container = "mx-auto w-full max-w-[1440px] px-5 sm:px-8";
 
   const L = hi
     ? {
-        badge: "ऑनलाइन पंजीकरण",
-        heroTitle: "ऑनलाइन पंजीकरण फॉर्म",
-        heroDesc:
-          "सबसे पहले अपना पद चुनें, उसके बाद फॉर्म में अपना पूरा विवरण सही-सही भरें।",
-        formTitle: "पंजीकरण फॉर्म",
-        formDesc: "कृपया अपना पूरा विवरण सही-सही भरें।",
+        formTitle: "ऑनलाइन पंजीकरण फॉर्म",
+        formDesc: "सबसे पहले अपना पद चुनें, उसके बाद अपना पूरा विवरण सही-सही भरें।",
         secPost: "पद चयन",
         postHelp: "पहले वह पद चुनें जिसके लिए आप पंजीकरण करना चाहते हैं",
         selectedPost: "चयनित पद",
@@ -100,6 +94,12 @@ const Contact: React.FC = () => {
         secBackground: "शिक्षा एवं अनुभव",
         name: "नाम",
         parentName: "पिता का नाम",
+        dob: "जन्म तिथि",
+        aadhaar: "आधार नंबर",
+        aadhaarHelp: "12 अंकों का आधार नंबर दर्ज करें",
+        aadhaarError: "आधार नंबर 12 अंकों का होना चाहिए",
+        phoneError: "सही 10 अंकों का मोबाइल नंबर दर्ज करें",
+        dobError: "कृपया सही जन्म तिथि चुनें",
         address: "पूरा पता",
         village: "गाँव",
         pincode: "पिन कोड",
@@ -119,6 +119,8 @@ const Contact: React.FC = () => {
         blockPlaceholderReady: "ब्लॉक / तहसील लिखें",
         education: "शैक्षिक योग्यता",
         occupation: "व्यवसाय",
+        previousCompany: "पिछली कंपनी का नाम (यदि अभी कार्यरत हैं)",
+        phPreviousCompany: "जहाँ पहले काम किया, उस कंपनी का नाम",
         experience: "अनुभव (वैकल्पिक)",
         phExperience: "अपना कार्य अनुभव संक्षेप में लिखें",
         phone: "मोबाइल नंबर",
@@ -130,18 +132,13 @@ const Contact: React.FC = () => {
         manualToggleOff: "पिन कोड से अपने आप भरें",
         phName: "उदा. राहुल वर्मा",
         phParent: "उदा. सुरेश वर्मा",
-        website: "आधिकारिक वेबसाइट",
         successTitle: "पंजीकरण सफल रहा",
         successDesc: "आपका पंजीकरण प्राप्त हो गया है। हमारी टीम जल्द ही आपसे संपर्क करेगी।",
         btnNew: "नया पंजीकरण करें",
       }
     : {
-        badge: "Online Registration",
-        heroTitle: "Online Registration Form",
-        heroDesc:
-          "First select your post, then fill in your complete details in the form accurately.",
-        formTitle: "Registration Form",
-        formDesc: "Please fill in all your details accurately.",
+        formTitle: "Online Registration Form",
+        formDesc: "First select your post, then fill in your complete details accurately.",
         secPost: "Select Post",
         postHelp: "First choose the post you want to register for",
         selectedPost: "Selected post",
@@ -152,6 +149,12 @@ const Contact: React.FC = () => {
         secBackground: "Education & experience",
         name: "Name",
         parentName: "Father's Name",
+        dob: "Date of Birth",
+        aadhaar: "Aadhaar Number",
+        aadhaarHelp: "Enter your 12-digit Aadhaar number",
+        aadhaarError: "Aadhaar number must be 12 digits",
+        phoneError: "Enter a valid 10-digit mobile number",
+        dobError: "Please select a valid date of birth",
         address: "Full Address",
         village: "Village",
         pincode: "PIN Code",
@@ -171,6 +174,8 @@ const Contact: React.FC = () => {
         blockPlaceholderReady: "Enter Block / Tehsil",
         education: "Educational Qualification",
         occupation: "Occupation",
+        previousCompany: "Previous Company Name (if currently working)",
+        phPreviousCompany: "Name of the company you worked at before",
         experience: "Experience (optional)",
         phExperience: "Briefly describe your work experience",
         phone: "Mobile No.",
@@ -182,27 +187,10 @@ const Contact: React.FC = () => {
         manualToggleOff: "Auto-fill address using PIN code instead",
         phName: "e.g. Rahul Verma",
         phParent: "e.g. Suresh Verma",
-        website: "Official Website",
         successTitle: "Registration successful",
         successDesc: "Your registration has been received. Our team will contact you soon.",
         btnNew: "Register another person",
       };
-
-  const DOCS = hi
-    ? [
-        "शैक्षिक योग्यता प्रमाण पत्र",
-        "आधार कार्ड की छायाप्रति",
-        "बैंक पासबुक / एकाउंट की फोटो कॉपी",
-        "2 पासपोर्ट साइज़ नवीनतम फोटो",
-        "₹250 पंजीयन शुल्क (अप्रतिदेय)",
-      ]
-    : [
-        "Educational Qualification Certificates",
-        "Photocopy of Aadhaar Card",
-        "Bank Account / Passbook Photocopy",
-        "2 Recent Passport Size Photographs",
-        "₹250 Registration Fee (Non-Refundable)",
-      ];
 
   const selectedPost = POSTS.find((p) => p.id === form.appliedPost) || null;
 
@@ -280,6 +268,12 @@ const Contact: React.FC = () => {
       return;
     }
 
+    if (name === "aadhaarNumber") {
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 12);
+      setForm((f) => ({ ...f, aadhaarNumber: digitsOnly }));
+      return;
+    }
+
     if (name === "postOffice") {
       const po = postOffices.find((p) => p.Name === value);
       setForm((f) => ({
@@ -312,6 +306,18 @@ const Contact: React.FC = () => {
       setSubmitError(L.postFirst);
       return;
     }
+    if (!/^[6-9]\d{9}$/.test(form.phone)) {
+      setSubmitError(L.phoneError);
+      return;
+    }
+    if (!/^\d{12}$/.test(form.aadhaarNumber)) {
+      setSubmitError(L.aadhaarError);
+      return;
+    }
+    if (!form.dateOfBirth || form.dateOfBirth > todayISO() || form.dateOfBirth < "1900-01-01") {
+      setSubmitError(L.dobError);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -334,8 +340,8 @@ const Contact: React.FC = () => {
   };
 
   const inputClass =
-    "w-full rounded border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0B2545] focus:ring-1 focus:ring-[#0B2545]/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
-  const labelClass = "mb-1 block text-[10px] font-bold";
+    "w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0B2545] focus:ring-2 focus:ring-[#0B2545]/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 sm:text-base";
+  const labelClass = "mb-1.5 block text-sm font-semibold";
 
   const Req = () => <span style={{ color: RUST }}> *</span>;
 
@@ -344,17 +350,17 @@ const Contact: React.FC = () => {
     title: string;
     action?: React.ReactNode;
   }> = ({ num, title, action }) => (
-    <div className="flex items-center gap-2.5 pt-1">
+    <div className="flex flex-wrap items-center gap-3 pt-3">
       <span
-        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
         style={{ backgroundColor: NAVY }}
       >
         {num}
       </span>
-      <h4 className="shrink-0 text-xs font-bold" style={{ color: NAVY }}>
+      <h4 className="shrink-0 text-base font-bold sm:text-lg" style={{ color: NAVY }}>
         {title}
       </h4>
-      <span className="h-px flex-1 bg-slate-200" />
+      <span className="hidden h-px flex-1 bg-slate-200 sm:block" />
       {action}
     </div>
   );
@@ -369,6 +375,8 @@ const Contact: React.FC = () => {
     value?: string;
     inputMode?: "numeric";
     maxLength?: number;
+    max?: string;
+    min?: string;
     textarea?: boolean;
   }) => (
     <div key={p.name} className="min-w-0">
@@ -382,7 +390,7 @@ const Contact: React.FC = () => {
           required={p.required}
           placeholder={p.placeholder}
           maxLength={p.maxLength}
-          rows={3}
+          rows={4}
           value={p.value !== undefined ? p.value : (form as any)[p.name]}
           onChange={handleChange}
           className={inputClass}
@@ -396,6 +404,8 @@ const Contact: React.FC = () => {
           disabled={p.disabled}
           inputMode={p.inputMode}
           maxLength={p.maxLength}
+          max={p.max}
+          min={p.min}
           value={p.value !== undefined ? p.value : (form as any)[p.name]}
           onChange={handleChange}
           className={inputClass}
@@ -414,7 +424,7 @@ const Contact: React.FC = () => {
         setPinStatus("idle");
         setPostOffices([]);
       }}
-      className="shrink-0 text-[10px] font-semibold hover:underline"
+      className="shrink-0 text-xs font-semibold hover:underline sm:text-sm"
       style={{ color: RUST }}
     >
       {manualMode ? L.manualToggleOff : L.manualToggleOn}
@@ -425,388 +435,345 @@ const Contact: React.FC = () => {
     <div className="min-h-screen bg-white text-slate-900 antialiased" style={{ fontFamily: FONT }}>
       <Header />
 
-      {/* ================= HERO ================= */}
-      <section className="bg-[#F1F5F9]">
-        <div className={`${container} py-10 sm:py-12`}>
-          <p className="text-[11px] font-semibold" style={{ color: RUST }}>
-            {L.badge}
-          </p>
-          <h1
-            className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl"
-            style={{ color: NAVY }}
-          >
-            {L.heroTitle}
-          </h1>
-          <p className="mt-4 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-[13px]">
-            {L.heroDesc}
-          </p>
-        </div>
-      </section>
+      {/* ================= ONLINE REGISTRATION FORM ONLY ================= */}
+      <section className="min-h-[50vh] bg-[#F1F5F9]/60">
+        <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 sm:py-16">
+          <div className="rounded-lg border border-slate-100 bg-white p-6 shadow-[0_2px_20px_rgba(11,37,69,0.10)] sm:p-10">
+            <h1 className="text-3xl font-bold leading-tight sm:text-4xl" style={{ color: NAVY }}>
+              {L.formTitle}
+            </h1>
+            <p className="mt-2 text-sm text-slate-600 sm:text-base">{L.formDesc}</p>
 
-      {/* ================= OFFICE INFO + FORM ================= */}
-      <section className="bg-[#F1F5F9]/60">
-        <div className={`${container} py-8 sm:py-10`}>
-          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-10">
-            {/* ---------- LEFT ---------- */}
-            <div className="max-w-md">
-              <div className="flex items-center gap-1.5">
-                <PinIcon />
-                <p className="text-[10px] font-semibold" style={{ color: RUST }}>
-                  {t.contact.officeBadge}
-                </p>
-              </div>
-
-              <div className="mt-3 flex items-center gap-3">
-                <div className="flex h-25 w-25 shrink-0 items-center justify-center overflow-hidden ">
-                  <img
-                    src="/img/newlogo.png"
-                    alt="कर्मभूमि लोगो"
-                    className="h-full w-full rounded-full object-contain"
-                  />
+            {submitted ? (
+              <div className="mt-8 rounded-md bg-[#E6EDF4] p-8 text-center sm:p-12">
+                <div
+                  className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full text-3xl font-bold text-white"
+                  style={{ backgroundColor: RUST }}
+                >
+                  ✓
                 </div>
-                <h2 className="text-xl font-bold sm:text-2xl" style={{ color: NAVY }}>
-                  {t.nav.companyName}
-                </h2>
+                <h4 className="text-xl font-bold sm:text-2xl" style={{ color: NAVY }}>
+                  {L.successTitle}
+                </h4>
+                <p className="mt-3 text-sm text-slate-600 sm:text-base">{L.successDesc}</p>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="mt-6 rounded-md px-7 py-3 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-95 sm:text-base"
+                  style={{ backgroundColor: RUST }}
+                >
+                  {L.btnNew}
+                </button>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+                {/* Honeypot - bots fill this, humans don't */}
+                <input
+                  type="text"
+                  name="website"
+                  value={form.website}
+                  onChange={handleChange}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  style={{
+                    position: "absolute",
+                    left: "-9999px",
+                    opacity: 0,
+                    height: 0,
+                    width: 0,
+                  }}
+                  aria-hidden="true"
+                />
 
-              <p className="mt-3 text-xs leading-relaxed text-slate-600">
-                {t.footer.officeAddress}
-              </p>
-              <p className="mt-2 text-[10px] text-slate-500">
-                {t.footer.cinLabel}: U70102UP2012PLC053219
-              </p>
+                {/* ---- 1. Select post ---- */}
+                <Section num={1} title={L.secPost} />
 
-              <div className="mt-5 bg-[#E6EDF4] px-5 py-5">
-                <h3 className="text-sm font-bold sm:text-[15px]" style={{ color: NAVY }}>
-                  {t.contact.checklistTitle}
-                </h3>
-                <ul className="mt-3 space-y-2 text-xs text-slate-600">
-                  {DOCS.map((doc, idx) => (
-                    <li key={idx}>{doc}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-5">
-                <p className="text-[10px] font-semibold" style={{ color: RUST }}>
-                  {L.website}
-                </p>
-                <p className="mt-1 text-xs text-slate-600">www.karmbhumiindia.com</p>
-              </div>
-            </div>
-
-            {/* ---------- RIGHT: form ---------- */}
-            <div className="rounded border border-slate-100 bg-white p-5 shadow-[0_2px_14px_rgba(11,37,69,0.08)] sm:p-6">
-              <h3 className="text-base font-bold sm:text-lg" style={{ color: NAVY }}>
-                {L.formTitle}
-              </h3>
-              <p className="mt-1 text-[11px] text-slate-500">{L.formDesc}</p>
-
-              {submitted ? (
-                <div className="mt-6 bg-[#E6EDF4] p-6 text-center">
-                  <div
-                    className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold text-white"
-                    style={{ backgroundColor: RUST }}
-                  >
-                    ✓
-                  </div>
-                  <h4 className="text-base font-bold" style={{ color: NAVY }}>
-                    {L.successTitle}
-                  </h4>
-                  <p className="mt-2 text-xs text-slate-600">{L.successDesc}</p>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="mt-5 rounded-md px-5 py-2.5 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95"
-                    style={{ backgroundColor: RUST }}
-                  >
-                    {L.btnNew}
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
-                  {/* Honeypot - bots fill this, humans don't */}
-                  <input
-                    type="text"
-                    name="website"
-                    value={form.website}
-                    onChange={handleChange}
-                    tabIndex={-1}
-                    autoComplete="off"
-                    style={{
-                      position: "absolute",
-                      left: "-9999px",
-                      opacity: 0,
-                      height: 0,
-                      width: 0,
-                    }}
-                    aria-hidden="true"
-                  />
-
-                  {/* ---- 1. Select post (pehle post select karna hai) ---- */}
-                  <Section num={1} title={L.secPost} />
-
-                  {!selectedPost ? (
-                    <>
-                      <p className="text-[10px] text-slate-500">{L.postHelp}</p>
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                        {POSTS.map((p, idx) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => {
-                              setSubmitError(null);
-                              setForm((f) => ({ ...f, appliedPost: p.id }));
-                            }}
-                            className="flex items-center gap-2 rounded border border-slate-200 bg-white px-3 py-2.5 text-left text-xs font-semibold transition hover:border-[#0B2545] hover:bg-slate-50"
-                            style={{ color: NAVY }}
-                          >
-                            <span className="w-4 shrink-0 text-[10px] font-bold text-slate-400">
-                              {idx + 1}
-                            </span>
-                            <span>{hi ? p.hi : p.en}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex items-center justify-between gap-3 rounded bg-[#E6EDF4] px-4 py-3">
-                      <div>
-                        <p className="text-[10px] font-semibold text-slate-500">{L.selectedPost}</p>
-                        <p className="text-sm font-bold" style={{ color: NAVY }}>
-                          {hi ? selectedPost.hi : selectedPost.en}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, appliedPost: "" }))}
-                        className="text-[11px] font-semibold hover:underline"
-                        style={{ color: RUST }}
-                      >
-                        {L.changePost}
-                      </button>
+                {!selectedPost ? (
+                  <>
+                    <p className="text-xs text-slate-600 sm:text-sm">{L.postHelp}</p>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {POSTS.map((p, idx) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => {
+                            setSubmitError(null);
+                            setForm((f) => ({ ...f, appliedPost: p.id }));
+                          }}
+                          className="flex items-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-4 text-left text-sm font-semibold transition hover:border-[#0B2545] hover:bg-slate-50 sm:text-base"
+                          style={{ color: NAVY }}
+                        >
+                          <span className="w-5 shrink-0 text-xs font-bold text-slate-400 sm:text-sm">
+                            {idx + 1}
+                          </span>
+                          <span>{hi ? p.hi : p.en}</span>
+                        </button>
+                      ))}
                     </div>
-                  )}
+                  </>
+                ) : (
+                  <div className="flex items-center justify-between gap-3 rounded-md bg-[#E6EDF4] px-5 py-4">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 sm:text-sm">
+                        {L.selectedPost}
+                      </p>
+                      <p className="text-base font-bold sm:text-lg" style={{ color: NAVY }}>
+                        {hi ? selectedPost.hi : selectedPost.en}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, appliedPost: "" }))}
+                      className="text-sm font-semibold hover:underline sm:text-base"
+                      style={{ color: RUST }}
+                    >
+                      {L.changePost}
+                    </button>
+                  </div>
+                )}
 
-                  {/* Baaki form tabhi dikhega jab post select ho jaye */}
-                  {selectedPost && (
-                    <>
-                      {/* ---- 2. Personal details ---- */}
-                      <Section num={2} title={L.secPersonal} />
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {/* Baaki form tabhi dikhega jab post select ho jaye */}
+                {selectedPost && (
+                  <>
+                    {/* ---- 2. Personal details ---- */}
+                    <Section num={2} title={L.secPersonal} />
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {renderField({
+                        label: L.name,
+                        name: "name",
+                        required: true,
+                        placeholder: L.phName,
+                      })}
+                      {renderField({
+                        label: L.parentName,
+                        name: "fatherName",
+                        required: true,
+                        placeholder: L.phParent,
+                      })}
+                      {renderField({
+                        label: L.dob,
+                        name: "dateOfBirth",
+                        required: true,
+                        type: "date",
+                        max: todayISO(),
+                        min: "1900-01-01",
+                      })}
+                      <div className="min-w-0">
                         {renderField({
-                          label: L.name,
-                          name: "name",
-                          required: true,
-                          placeholder: L.phName,
-                        })}
-                        {renderField({
-                          label: L.parentName,
-                          name: "fatherName",
-                          required: true,
-                          placeholder: L.phParent,
-                        })}
-                        {renderField({
-                          label: L.phone,
-                          name: "phone",
+                          label: L.aadhaar,
+                          name: "aadhaarNumber",
                           required: true,
                           type: "tel",
                           inputMode: "numeric",
-                          maxLength: 10,
-                          placeholder: "98765 43210",
+                          maxLength: 12,
+                          placeholder: "1234 5678 9012",
                         })}
-                        {renderField({
-                          label: L.email,
-                          name: "email",
-                          type: "email",
-                          placeholder: "name@example.com",
-                        })}
-                      </div>
-
-                      {/* ---- 3. Address ---- */}
-                      <Section num={3} title={L.secAddress} action={manualToggle} />
-
-                      {!manualMode ? (
-                        <>
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            {renderField({
-                              label: L.pincode,
-                              name: "pincode",
-                              required: true,
-                              placeholder: "e.g. 282001",
-                              inputMode: "numeric",
-                              maxLength: 6,
-                            })}
-                            {renderField({
-                              label: L.village,
-                              name: "village",
-                              required: true,
-                            })}
-                          </div>
-
-                          <p className="-mt-1 text-[10px] text-slate-500">{L.pincodeHelp}</p>
-                          {pinStatus === "loading" && (
-                            <p className="text-[11px] font-semibold" style={{ color: NAVY }}>
-                              {L.pincodeLoading}
-                            </p>
-                          )}
-                          {pinStatus === "error" && (
-                            <p className="text-[11px] font-semibold text-red-600">
-                              {L.pincodeError}
-                            </p>
-                          )}
-
-                          {postOffices.length > 1 && (
-                            <div>
-                              <label className={labelClass} style={{ color: NAVY }}>
-                                {L.postOffice}
-                                <Req />
-                              </label>
-                              <select
-                                name="postOffice"
-                                required
-                                value={form.postOffice}
-                                onChange={handleChange}
-                                className={inputClass}
-                              >
-                                <option value="">{L.selectPostOffice}</option>
-                                {postOffices.map((po) => (
-                                  <option key={po.Name} value={po.Name}>
-                                    {po.Name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
-
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            {renderField({
-                              label: L.state,
-                              name: "state",
-                              disabled: true,
-                              placeholder: L.autoFilled,
-                              value: form.state,
-                            })}
-                            {renderField({
-                              label: L.district,
-                              name: "district",
-                              disabled: true,
-                              placeholder: L.autoFilled,
-                              value: form.district,
-                            })}
-                            {renderField({
-                              label: L.block,
-                              name: "block",
-                              disabled: true,
-                              placeholder: L.autoFilled,
-                              value: form.block,
-                            })}
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            {renderField({
-                              label: L.village,
-                              name: "village",
-                              required: true,
-                            })}
-                            <div className="min-w-0">
-                              <label className={labelClass} style={{ color: NAVY }}>
-                                {L.state}
-                                <Req />
-                              </label>
-                              <select
-                                name="state"
-                                required
-                                value={form.state}
-                                onChange={handleChange}
-                                className={inputClass}
-                              >
-                                <option value="">{L.selectState}</option>
-                                {INDIAN_STATES.map((s) => (
-                                  <option key={s} value={s}>
-                                    {s}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div className="min-w-0">
-                              <label className={labelClass} style={{ color: NAVY }}>
-                                {L.district}
-                                <Req />
-                              </label>
-                              <select
-                                name="district"
-                                required
-                                value={form.district}
-                                onChange={handleChange}
-                                disabled={!form.state}
-                                className={inputClass}
-                              >
-                                <option value="">
-                                  {form.state ? L.selectDistrictReady : L.selectDistrict}
-                                </option>
-                                {districtOptions.map((d) => (
-                                  <option key={d} value={d}>
-                                    {d}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            {renderField({
-                              label: L.block,
-                              name: "block",
-                              required: true,
-                              disabled: !form.district,
-                              placeholder: form.district
-                                ? L.blockPlaceholderReady
-                                : L.blockPlaceholderLocked,
-                            })}
-                          </div>
-                        </>
-                      )}
-
-                      {renderField({ label: L.address, name: "address", required: true })}
-
-                      {/* ---- 4. Education & experience ---- */}
-                      <Section num={4} title={L.secBackground} />
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        {renderField({ label: L.education, name: "education", required: true })}
-                        {renderField({ label: L.occupation, name: "occupation", required: true })}
+                        <p className="mt-1 text-xs text-slate-500">{L.aadhaarHelp}</p>
                       </div>
                       {renderField({
-                        label: L.experience,
-                        name: "experience",
-                        textarea: true,
-                        maxLength: 500,
-                        placeholder: L.phExperience,
+                        label: L.phone,
+                        name: "phone",
+                        required: true,
+                        type: "tel",
+                        inputMode: "numeric",
+                        maxLength: 10,
+                        placeholder: "98765 43210",
                       })}
-                    </>
-                  )}
+                      {renderField({
+                        label: L.email,
+                        name: "email",
+                        type: "email",
+                        placeholder: "name@example.com",
+                      })}
+                    </div>
 
-                  {submitError && (
-                    <p className="text-[11px] font-semibold text-red-600">{submitError}</p>
-                  )}
+                    {/* ---- 3. Address ---- */}
+                    <Section num={3} title={L.secAddress} action={manualToggle} />
 
-                  <div className="flex items-center justify-between gap-3 pt-1">
-                    <span className="text-[10px] text-slate-500">{L.required}</span>
-                    <button
-                      type="submit"
-                      disabled={submitting || !selectedPost}
-                      className="inline-flex items-center gap-2 rounded-md px-5 py-2.5 text-xs font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
-                      style={{ backgroundColor: RUST }}
-                    >
-                      <span>{submitting ? L.submitting : L.submit}</span>
-                      {!submitting && <Arrow />}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
+                    {!manualMode ? (
+                      <>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          {renderField({
+                            label: L.pincode,
+                            name: "pincode",
+                            required: true,
+                            placeholder: "e.g. 282001",
+                            inputMode: "numeric",
+                            maxLength: 6,
+                          })}
+                          {renderField({
+                            label: L.village,
+                            name: "village",
+                            required: true,
+                          })}
+                        </div>
+
+                        <p className="-mt-2 text-xs text-slate-600 sm:text-sm">{L.pincodeHelp}</p>
+                        {pinStatus === "loading" && (
+                          <p className="text-sm font-semibold" style={{ color: NAVY }}>
+                            {L.pincodeLoading}
+                          </p>
+                        )}
+                        {pinStatus === "error" && (
+                          <p className="text-sm font-semibold text-red-600">{L.pincodeError}</p>
+                        )}
+
+                        {postOffices.length > 1 && (
+                          <div>
+                            <label className={labelClass} style={{ color: NAVY }}>
+                              {L.postOffice}
+                              <Req />
+                            </label>
+                            <select
+                              name="postOffice"
+                              required
+                              value={form.postOffice}
+                              onChange={handleChange}
+                              className={inputClass}
+                            >
+                              <option value="">{L.selectPostOffice}</option>
+                              {postOffices.map((po) => (
+                                <option key={po.Name} value={po.Name}>
+                                  {po.Name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                          {renderField({
+                            label: L.state,
+                            name: "state",
+                            disabled: true,
+                            placeholder: L.autoFilled,
+                            value: form.state,
+                          })}
+                          {renderField({
+                            label: L.district,
+                            name: "district",
+                            disabled: true,
+                            placeholder: L.autoFilled,
+                            value: form.district,
+                          })}
+                          {renderField({
+                            label: L.block,
+                            name: "block",
+                            disabled: true,
+                            placeholder: L.autoFilled,
+                            value: form.block,
+                          })}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          {renderField({
+                            label: L.village,
+                            name: "village",
+                            required: true,
+                          })}
+                          <div className="min-w-0">
+                            <label className={labelClass} style={{ color: NAVY }}>
+                              {L.state}
+                              <Req />
+                            </label>
+                            <select
+                              name="state"
+                              required
+                              value={form.state}
+                              onChange={handleChange}
+                              className={inputClass}
+                            >
+                              <option value="">{L.selectState}</option>
+                              {INDIAN_STATES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div className="min-w-0">
+                            <label className={labelClass} style={{ color: NAVY }}>
+                              {L.district}
+                              <Req />
+                            </label>
+                            <select
+                              name="district"
+                              required
+                              value={form.district}
+                              onChange={handleChange}
+                              disabled={!form.state}
+                              className={inputClass}
+                            >
+                              <option value="">
+                                {form.state ? L.selectDistrictReady : L.selectDistrict}
+                              </option>
+                              {districtOptions.map((d) => (
+                                <option key={d} value={d}>
+                                  {d}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          {renderField({
+                            label: L.block,
+                            name: "block",
+                            required: true,
+                            disabled: !form.district,
+                            placeholder: form.district
+                              ? L.blockPlaceholderReady
+                              : L.blockPlaceholderLocked,
+                          })}
+                        </div>
+                      </>
+                    )}
+
+                    {renderField({ label: L.address, name: "address", required: true })}
+
+                    {/* ---- 4. Education & experience ---- */}
+                    <Section num={4} title={L.secBackground} />
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {renderField({ label: L.education, name: "education", required: true })}
+                      {renderField({ label: L.occupation, name: "occupation", required: true })}
+                    </div>
+                    {renderField({
+                      label: L.previousCompany,
+                      name: "previousCompanyName",
+                      maxLength: 150,
+                      placeholder: L.phPreviousCompany,
+                    })}
+                    {renderField({
+                      label: L.experience,
+                      name: "experience",
+                      textarea: true,
+                      maxLength: 500,
+                      placeholder: L.phExperience,
+                    })}
+                  </>
+                )}
+
+                {submitError && (
+                  <p className="text-sm font-semibold text-red-600">{submitError}</p>
+                )}
+
+                <div className="flex flex-col-reverse items-stretch justify-between gap-4 pt-3 sm:flex-row sm:items-center">
+                  <span className="text-xs text-slate-600 sm:text-sm">{L.required}</span>
+                  <button
+                    type="submit"
+                    disabled={submitting || !selectedPost}
+                    className="inline-flex items-center justify-center gap-2 rounded-md px-8 py-3.5 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
+                    style={{ backgroundColor: RUST }}
+                  >
+                    <span>{submitting ? L.submitting : L.submit}</span>
+                    {!submitting && <Arrow />}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </section>

@@ -32,6 +32,7 @@ export const POST_LABELS: Record<string, string> = {
   HRM: "HRM",
   ZO: "ZO",
   GCM: "GCM",
+  RM: "RM",
   DVM: "DVM",
   DBM: "DBM",
   SBM: "SBM",
@@ -52,6 +53,8 @@ export interface ContactFormData {
   appliedPost: string;
   name: string;
   fatherName: string;
+  dateOfBirth: string; // YYYY-MM-DD
+  aadhaarNumber: string; // 12 digit
   address: string;
   village: string;
   pincode: string;
@@ -61,6 +64,7 @@ export interface ContactFormData {
   state: string;
   education: string;
   occupation: string;
+  previousCompanyName?: string; // optional (agar abhi kaam kar rahe hain)
   experience?: string;
   phone: string;
   email?: string;
@@ -72,6 +76,8 @@ interface ContactPayload {
   appliedPost: string;
   name: string;
   fatherName: string;
+  dateOfBirth: string;
+  aadhaarNumber: string;
   village: string;
   address: string;
   pincode: string;
@@ -80,6 +86,7 @@ interface ContactPayload {
   block: string;
   education: string;
   occupation: string;
+  previousCompanyName?: string;
   experience?: string;
   phone: string;
   email?: string;
@@ -128,6 +135,9 @@ const toPayload = (form: ContactFormData): ContactPayload => {
     appliedPost: trim(form.appliedPost),
     name: trim(form.name),
     fatherName: trim(form.fatherName),
+    dateOfBirth: trim(form.dateOfBirth),
+    // spaces/hyphen hata kar sirf 12 digit bhejte hain
+    aadhaarNumber: trim(form.aadhaarNumber).replace(/[\s-]/g, ""),
     village: trim(form.village),
     address: trim(form.address),
     pincode: trim(form.pincode),
@@ -140,6 +150,9 @@ const toPayload = (form: ContactFormData): ContactPayload => {
     phone: trim(form.phone),
     website: form.website || "",
   };
+
+  const previousCompanyName = trim(form.previousCompanyName);
+  if (previousCompanyName) payload.previousCompanyName = previousCompanyName;
 
   const experience = trim(form.experience);
   if (experience) payload.experience = experience;
@@ -226,6 +239,8 @@ export interface ContactRecord {
   name: string;
   fatherName: string;
   motherName: string; // ab form me nahi hai, CPanel purana code na toote isliye "" aata hai
+  dateOfBirth: string; // YYYY-MM-DD (khali ho sakta hai)
+  aadhaarNumber: string; // list me masked (XXXX-XXXX-1234), detail me poora
   village: string;
   address: string;
   pincode: string;
@@ -234,6 +249,7 @@ export interface ContactRecord {
   block: string;
   education: string;
   occupation: string;
+  previousCompanyName: string;
   experience: string;
   phone: string;
   email: string;
@@ -251,6 +267,12 @@ export interface ContactListResult {
 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
+/** DB DATE kabhi "2000-01-31" kabhi "2000-01-31T00:00:00.000Z" aa sakti hai -> YYYY-MM-DD */
+const dateOnly = (v: unknown) => {
+  const s = str(v);
+  return s ? s.slice(0, 10) : "";
+};
+
 /** Backend ki raw row (full_name, father_name, ...) -> ContactRecord */
 const normalizeContact = (r: any): ContactRecord => ({
   id: String(r.id),
@@ -259,6 +281,8 @@ const normalizeContact = (r: any): ContactRecord => ({
   name: str(r.full_name) || str(r.name),
   fatherName: str(r.father_name),
   motherName: str(r.mother_name),
+  dateOfBirth: dateOnly(r.date_of_birth),
+  aadhaarNumber: str(r.aadhaar_number),
   village: str(r.village),
   address: str(r.address),
   pincode: str(r.pincode),
@@ -267,6 +291,7 @@ const normalizeContact = (r: any): ContactRecord => ({
   block: str(r.block),
   education: str(r.education),
   occupation: str(r.occupation),
+  previousCompanyName: str(r.previous_company_name),
   experience: str(r.experience),
   phone: str(r.contact_number) || str(r.phone),
   email: str(r.email),
@@ -341,6 +366,12 @@ export const fetchContacts = async (opts: {
     page: res.pagination.page,
     pages: res.pagination.totalPages || 1,
   };
+};
+
+/** GET /api/contact/:id  (detail me poora Aadhaar aata hai) */
+export const fetchContactById = async (id: string): Promise<ContactRecord> => {
+  const res = await authFetch<{ data: any }>(`/contact/${id}`);
+  return normalizeContact(res.data);
 };
 
 /** PATCH /api/contact/:id/status */
