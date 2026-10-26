@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useLanguage } from "../context/LanguageContext";
@@ -27,6 +27,133 @@ const POSTS: { id: string; en: string; hi: string }[] = [
   { id: "ADVISOR", en: "Advisor", hi: "सलाहकार (Advisor)" },
   { id: "MEMBER", en: "Member", hi: "सदस्य (Member)" },
 ];
+
+// Shaikshik yogyata dropdown - order same as handwritten list (image).
+// value DB me "education" column me save hoti hai (max 100 chars).
+const EDUCATION_GROUPS: { en: string; hi: string; options: string[] }[] = [
+  { en: "School", hi: "स्कूल", options: ["HSc", "Intermediate"] },
+  {
+    en: "Graduation",
+    hi: "स्नातक",
+    options: ["BA", "BSc", "B.Com", "BBA", "BCA", "B.Tech / BE"],
+  },
+  { en: "Post Graduation", hi: "स्नातकोत्तर", options: ["MA", "MSc", "MBA", "M.Tech"] },
+  {
+    en: "Professional",
+    hi: "प्रोफेशनल",
+    options: ["MBBS", "BDS", "BAMS", "LLB"],
+  },
+  { en: "Doctorate & Research", hi: "डॉक्टरेट एवं शोध", options: ["NET", "JRF", "PhD"] },
+];
+
+// "Other" select hone par user khud likhta hai
+const EDU_OTHER = "__OTHER__";
+
+// ---------- Compact custom dropdown (native select ka bada popup nahi aata) ----------
+type DropdownGroup = { label: string; options: string[] };
+
+const QualificationDropdown: React.FC<{
+  value: string; // "" | option | EDU_OTHER
+  groups: DropdownGroup[];
+  placeholder: string;
+  otherLabel: string;
+  className: string; // inputClass se match karne ke liye
+  onSelect: (v: string) => void;
+}> = ({ value, groups, placeholder, otherLabel, className, onSelect }) => {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Bahar click ya Esc par band
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const pick = (v: string) => {
+    onSelect(v);
+    setOpen(false);
+  };
+
+  const display = value === EDU_OTHER ? otherLabel : value;
+
+  const optionCls = (active: boolean) =>
+    `flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors hover:bg-[#E6EDF4] ${
+      active ? "bg-[#E6EDF4] font-semibold" : "text-slate-800"
+    }`;
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className={`${className} flex items-center justify-between text-left`}
+      >
+        <span className={display ? "text-slate-900" : "text-slate-400"}>{display || placeholder}</span>
+        <svg
+          className={`ml-2 h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="listbox"
+          className="absolute left-0 right-0 z-30 mt-1 max-h-56 overflow-y-auto overscroll-contain rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+        >
+          {groups.map((g) => (
+            <div key={g.label}>
+              <p className="sticky top-0 bg-slate-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {g.label}
+              </p>
+              {g.options.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  role="option"
+                  aria-selected={value === q}
+                  onClick={() => pick(q)}
+                  className={optionCls(value === q)}
+                  style={{ color: value === q ? NAVY : undefined }}
+                >
+                  <span>{q}</span>
+                  {value === q && <span style={{ color: RUST }}>✓</span>}
+                </button>
+              ))}
+            </div>
+          ))}
+          <div className="mt-1 border-t border-slate-200">
+            <button
+              type="button"
+              role="option"
+              aria-selected={value === EDU_OTHER}
+              onClick={() => pick(EDU_OTHER)}
+              className={optionCls(value === EDU_OTHER)}
+              style={{ color: value === EDU_OTHER ? NAVY : undefined }}
+            >
+              <span>{otherLabel}</span>
+              {value === EDU_OTHER && <span style={{ color: RUST }}>✓</span>}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface PostOfficeResult {
   Name: string;
@@ -76,6 +203,8 @@ const Contact: React.FC = () => {
   const [pinStatus, setPinStatus] = useState<PinStatus>("idle");
   const [postOffices, setPostOffices] = useState<PostOfficeResult[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
+  // dropdown ka choice: "" | option | EDU_OTHER (form.education me final value rehti hai)
+  const [eduChoice, setEduChoice] = useState("");
 
   const { lang } = useLanguage();
   const hi = lang === "hi";
@@ -118,6 +247,12 @@ const Contact: React.FC = () => {
         blockPlaceholderLocked: "पहले जिला चुनें",
         blockPlaceholderReady: "ब्लॉक / तहसील लिखें",
         education: "शैक्षिक योग्यता",
+        selectEducation: "शैक्षिक योग्यता चुनें",
+        eduOther: "अन्य (Other)",
+        eduOtherLabel: "अपनी योग्यता लिखें",
+        eduOtherPh: "अपनी योग्यता लिखें, जैसे ITI, Diploma",
+        eduError: "कृपया शैक्षिक योग्यता चुनें",
+        eduOtherError: "कृपया अपनी शैक्षिक योग्यता लिखें",
         occupation: "व्यवसाय",
         previousCompany: "पिछली कंपनी का नाम (यदि अभी कार्यरत हैं)",
         phPreviousCompany: "जहाँ पहले काम किया, उस कंपनी का नाम",
@@ -173,6 +308,12 @@ const Contact: React.FC = () => {
         blockPlaceholderLocked: "Select district first",
         blockPlaceholderReady: "Enter Block / Tehsil",
         education: "Educational Qualification",
+        selectEducation: "Select qualification",
+        eduOther: "Other",
+        eduOtherLabel: "Enter your qualification",
+        eduOtherPh: "Type your qualification, e.g. ITI, Diploma",
+        eduError: "Please select your educational qualification",
+        eduOtherError: "Please enter your educational qualification",
         occupation: "Occupation",
         previousCompany: "Previous Company Name (if currently working)",
         phPreviousCompany: "Name of the company you worked at before",
@@ -314,6 +455,11 @@ const Contact: React.FC = () => {
       setSubmitError(L.aadhaarError);
       return;
     }
+    // Custom dropdown me native "required" nahi hota, isliye yaha check
+    if (!form.education.trim()) {
+      setSubmitError(eduChoice === EDU_OTHER ? L.eduOtherError : L.eduError);
+      return;
+    }
     if (!form.dateOfBirth || form.dateOfBirth > todayISO() || form.dateOfBirth < "1900-01-01") {
       setSubmitError(L.dobError);
       return;
@@ -336,6 +482,7 @@ const Contact: React.FC = () => {
     setPinStatus("idle");
     setPostOffices([]);
     setManualMode(false);
+    setEduChoice("");
     setForm(EMPTY_FORM);
   };
 
@@ -737,7 +884,41 @@ const Contact: React.FC = () => {
                     {/* ---- 4. Education & experience ---- */}
                     <Section num={4} title={L.secBackground} />
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {renderField({ label: L.education, name: "education", required: true })}
+                      <div className="min-w-0">
+                        <label className={labelClass} style={{ color: NAVY }}>
+                          {L.education}
+                          <Req />
+                        </label>
+                        <QualificationDropdown
+                          value={eduChoice}
+                          groups={EDUCATION_GROUPS.map((g) => ({
+                            label: hi ? g.hi : g.en,
+                            options: g.options,
+                          }))}
+                          placeholder={L.selectEducation}
+                          otherLabel={L.eduOther}
+                          className={inputClass}
+                          onSelect={(v) => {
+                            setEduChoice(v);
+                            // Other me user ka text, warna chuni hui value
+                            setForm((f) => ({ ...f, education: v === EDU_OTHER ? "" : v }));
+                          }}
+                        />
+                        {/* Other: usi column me, chhota aur neat input */}
+                        {eduChoice === EDU_OTHER && (
+                          <input
+                            type="text"
+                            name="education"
+                            autoFocus
+                            maxLength={100}
+                            aria-label={L.eduOtherLabel}
+                            placeholder={L.eduOtherPh}
+                            value={form.education}
+                            onChange={handleChange}
+                            className="mt-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0B2545] focus:ring-2 focus:ring-[#0B2545]/20"
+                          />
+                        )}
+                      </div>
                       {renderField({ label: L.occupation, name: "occupation", required: true })}
                     </div>
                     {renderField({
