@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
 import {
   fetchContacts,
+  fetchContactById,
   updateContactRead,
   deleteContact,
   POST_LABELS,
@@ -16,6 +17,14 @@ const PAGE_SIZE = 20;
 
 const dash = (v: string) => (v && v !== "NA" ? v : "-");
 const appNo = (id: string) => `#${String(id).padStart(5, "0")}`;
+
+// Aadhaar ko 4-4-4 format me dikhao: 123456789012 -> 1234 5678 9012
+// (masked "XXXX-XXXX-9012" jaisa aaye to waisa hi dikhega)
+const fmtAadhaar = (a: string) => {
+  if (!a) return "-";
+  if (/^\d{12}$/.test(a)) return a.replace(/(\d{4})(\d{4})(\d{4})/, "$1 $2 $3");
+  return a;
+};
 
 export default function CPanel() {
   const { user } = useAuth();
@@ -30,6 +39,7 @@ export default function CPanel() {
   const [postFilter, setPostFilter] = useState("");
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [selected, setSelected] = useState<Contact | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -103,15 +113,34 @@ export default function CPanel() {
     }
   }
 
-  // View click: form jaisa popup kholo, unread ho to read mark kar do
+  // View click: form jaisa popup kholo, unread ho to read mark kar do.
+  // List me Aadhaar masked aata hai, isliye popup khulte hi detail API se poora record laate hain.
   function openDetails(c: Contact) {
     setSelected(c);
     if (!c.is_read) setRead(c, true);
+
+    setDetailLoading(true);
+    fetchContactById(c.id)
+      .then((full) => {
+        // is_read ko current popup state se rakho (mark-read ka update abhi chal raha ho sakta hai)
+        setSelected((s) => (s && s.id === c.id ? { ...full, is_read: s.is_read } : s));
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Details load nahi hue");
+      })
+      .finally(() => setDetailLoading(false));
   }
 
   const fmt = (d: string) =>
     new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
   const fmtDate = (d: string) => new Date(d).toLocaleDateString("en-IN", { dateStyle: "medium" });
+  // DOB "YYYY-MM-DD" hai; timezone shift se bachne ke liye seedha parts se banate hain
+  const fmtDob = (d: string) => {
+    if (!d) return "-";
+    const [y, m, day] = d.split("-").map(Number);
+    if (!y || !m || !day) return d;
+    return new Date(y, m - 1, day).toLocaleDateString("en-IN", { dateStyle: "medium" });
+  };
 
   // Form jaisa ek field: upar chhota label, neeche value ki line
   const FormField = ({
@@ -452,6 +481,11 @@ export default function CPanel() {
                 <SectionTitle num={1} title="Personal details" />
                 <FormField label="Name" value={selected.name} />
                 <FormField label="Father's Name" value={selected.fatherName} />
+                <FormField label="Date of Birth" value={fmtDob(selected.dateOfBirth)} />
+                <FormField
+                  label="Aadhaar Number"
+                  value={detailLoading ? "Loading..." : fmtAadhaar(selected.aadhaarNumber)}
+                />
                 <FormField
                   label="Mobile No."
                   value={
@@ -484,6 +518,7 @@ export default function CPanel() {
                 <SectionTitle num={3} title="Education & experience" />
                 <FormField label="Educational Qualification" value={selected.education} />
                 <FormField label="Occupation" value={selected.occupation} />
+                <FormField label="Previous Company Name" value={selected.previousCompanyName} wide />
                 <FormField label="Experience" value={selected.experience} wide tall />
               </div>
             </div>
@@ -508,7 +543,8 @@ export default function CPanel() {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="rounded-md border px-3.5 py-2 text-xs font-semibold hover:bg-slate-100"
+                  disabled={detailLoading}
+                  className="rounded-md border px-3.5 py-2 text-xs font-semibold hover:bg-slate-100 disabled:opacity-50"
                   style={{ borderColor: NAVY, color: NAVY }}
                 >
                   Print
