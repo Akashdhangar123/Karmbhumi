@@ -18,7 +18,7 @@ const POSTS: { id: string; en: string; hi: string }[] = [
   { id: "CEO", en: "CEO", hi: "CEO" },
   { id: "HRM", en: "HRM", hi: "HRM" },
   { id: "ZO", en: "ZO", hi: "ZO" },
-  { id: "GCM", en: "GCM", hi: "GCM" },
+  { id: "GM", en: "GM", hi: "GM" },
   { id: "RM", en: "RM", hi: "RM" },
   { id: "DVM", en: "DVM", hi: "DVM" },
   { id: "DBM", en: "DBM", hi: "DBM" },
@@ -155,6 +155,89 @@ const QualificationDropdown: React.FC<{
   );
 };
 
+// ---------- Pad (post) chunne ka compact dropdown ----------
+const PostDropdown: React.FC<{
+  value: string; // post id ya ""
+  options: { id: string; label: string }[];
+  placeholder: string;
+  className: string; // inputClass se match karne ke liye
+  onSelect: (id: string) => void;
+}> = ({ value, options, placeholder, className, onSelect }) => {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Bahar click ya Esc par band
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const current = options.find((o) => o.id === value);
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className={`${className} flex items-center justify-between text-left`}
+      >
+        <span className={current ? "font-semibold text-slate-900" : "text-slate-400"}>
+          {current ? current.label : placeholder}
+        </span>
+        <svg
+          className={`ml-2 h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="listbox"
+          className="absolute left-0 right-0 z-30 mt-1 max-h-60 overflow-y-auto overscroll-contain rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+        >
+          {options.map((o) => {
+            const active = o.id === value;
+            return (
+              <button
+                key={o.id}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => {
+                  onSelect(o.id);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition-colors hover:bg-[#E6EDF4] ${
+                  active ? "bg-[#E6EDF4] font-semibold" : "text-slate-800"
+                }`}
+                style={{ color: active ? NAVY : undefined }}
+              >
+                <span>{o.label}</span>
+                {active && <span style={{ color: RUST }}>✓</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface PostOfficeResult {
   Name: string;
   Block: string;
@@ -214,7 +297,9 @@ const Contact: React.FC = () => {
         formTitle: "ऑनलाइन पंजीकरण फॉर्म",
         formDesc: "सबसे पहले अपना पद चुनें, उसके बाद अपना पूरा विवरण सही-सही भरें।",
         secPost: "पद चयन",
-        postHelp: "पहले वह पद चुनें जिसके लिए आप पंजीकरण करना चाहते हैं",
+        postHelp: "पहले वह पद चुनें जिसके लिए आप पंजीकरण करना चाहते हैं, उसके बाद फॉर्म खुलेगा",
+        postLabel: "पद",
+        selectPost: "पद चुनें",
         selectedPost: "चयनित पद",
         changePost: "बदलें",
         postFirst: "कृपया पहले पद चुनें",
@@ -275,7 +360,9 @@ const Contact: React.FC = () => {
         formTitle: "Online Registration Form",
         formDesc: "First select your post, then fill in your complete details accurately.",
         secPost: "Select Post",
-        postHelp: "First choose the post you want to register for",
+        postHelp: "First choose the post you want to register for. The form opens after that.",
+        postLabel: "Post",
+        selectPost: "Select post",
         selectedPost: "Selected post",
         changePost: "Change",
         postFirst: "Please select a post first",
@@ -635,49 +722,25 @@ const Contact: React.FC = () => {
                 {/* ---- 1. Select post ---- */}
                 <Section num={1} title={L.secPost} />
 
-                {!selectedPost ? (
-                  <>
-                    <p className="text-xs text-slate-600 sm:text-sm">{L.postHelp}</p>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      {POSTS.map((p, idx) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => {
-                            setSubmitError(null);
-                            setForm((f) => ({ ...f, appliedPost: p.id }));
-                          }}
-                          className="flex items-center gap-3 rounded-md border border-slate-300 bg-white px-4 py-4 text-left text-sm font-semibold transition hover:border-[#0B2545] hover:bg-slate-50 sm:text-base"
-                          style={{ color: NAVY }}
-                        >
-                          <span className="w-5 shrink-0 text-xs font-bold text-slate-400 sm:text-sm">
-                            {idx + 1}
-                          </span>
-                          <span>{hi ? p.hi : p.en}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center justify-between gap-3 rounded-md bg-[#E6EDF4] px-5 py-4">
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 sm:text-sm">
-                        {L.selectedPost}
-                      </p>
-                      <p className="text-base font-bold sm:text-lg" style={{ color: NAVY }}>
-                        {hi ? selectedPost.hi : selectedPost.en}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, appliedPost: "" }))}
-                      className="text-sm font-semibold hover:underline sm:text-base"
-                      style={{ color: RUST }}
-                    >
-                      {L.changePost}
-                    </button>
-                  </div>
-                )}
+                <div className="max-w-md">
+                  <label className={labelClass} style={{ color: NAVY }}>
+                    {L.postLabel}
+                    <Req />
+                  </label>
+                  <PostDropdown
+                    value={form.appliedPost}
+                    options={POSTS.map((p) => ({ id: p.id, label: hi ? p.hi : p.en }))}
+                    placeholder={L.selectPost}
+                    className={inputClass}
+                    onSelect={(id) => {
+                      setSubmitError(null);
+                      setForm((f) => ({ ...f, appliedPost: id }));
+                    }}
+                  />
+                  {!selectedPost && (
+                    <p className="mt-1.5 text-xs text-slate-600 sm:text-sm">{L.postHelp}</p>
+                  )}
+                </div>
 
                 {/* Baaki form tabhi dikhega jab post select ho jaye */}
                 {selectedPost && (
