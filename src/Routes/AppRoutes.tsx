@@ -10,6 +10,7 @@ import CPanel from "../pages/CPanel";
 import { LanguageProvider, useLanguage } from "../context/LanguageContext";
 import AuthorProfile from "../pages/Authoprofile";
 import SeoManager from "../components/SeoManager";
+import Maintenance from "../components/Maintenance";
 
 const NotFound = () => {
   const { lang } = useLanguage();
@@ -35,36 +36,44 @@ const NotFound = () => {
     </div>
   );
 };
+ const MAINTENANCE_MODE = true;
 
 const AppRoutes: React.FC = () => {
   return (
     <LanguageProvider>
-      <ScrollToTop />
-      <SeoManager />
-      <Routes>
-        {/* Public pages */}
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/karmbhoomi-bank" element={<KarmbhoomiBank />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/AuthorProfile" element={<AuthorProfile />} />
+      {MAINTENANCE_MODE ? (
+        <Maintenance />
+      ) : (
+        <>
+          <ScrollToTop />
+          <SeoManager />
 
-        {/* Auth */}
+          <Routes>
+            {/* Public pages */}
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/karmbhoomi-bank" element={<KarmbhoomiBank />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/AuthorProfile" element={<AuthorProfile />} />
 
-        {/* Protected: sirf super_admin */}
-        <Route
-          path="/cpanel"
-          element={
-            <ProtectedRoute roles={["super_admin"]}>
-              <CPanel />
-            </ProtectedRoute>
-          }
-        />
+            {/* Protected Admin */}
+            <Route
+              path="/cpanel"
+              element={
+                <ProtectedRoute roles={["super_admin"]}>
+                  <CPanel />
+                </ProtectedRoute>
+              }
+            />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </>
+      )}
     </LanguageProvider>
   );
 };
 
 export default AppRoutes;
+
