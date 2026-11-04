@@ -36,7 +36,7 @@ const NotFound = () => {
     </div>
   );
 };
- const MAINTENANCE_MODE = false;
+ const MAINTENANCE_MODE = true;
 
 const AppRoutes: React.FC = () => {
   return (
